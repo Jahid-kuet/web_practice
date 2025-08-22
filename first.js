@@ -1,75 +1,142 @@
-/*header*/ 
-function toggleMenu() {
-    document.getElementById("navbar").classList.toggle("show");
-}
+const themeToggle = document.getElementById('themeToggle');
+const themeOptions = document.getElementById('themeOptions');
+const themeButtons = document.querySelectorAll('.theme-btn');
 
-document.addEventListener("DOMContentLoaded", () => {
-  const fadeElements = document.querySelectorAll(".fade-in");
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-      }
-    });
-  }, { threshold: 0.2 });
-
-  fadeElements.forEach(el => observer.observe(el));
+// Toggle dropdown visibility
+themeToggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  themeOptions.classList.toggle('active');
 });
-//project image preview model
-const modal = document.getElementById("imgModal");
-const modalImg = document.getElementById("modalImage");
-const closeBtn = document.querySelector(".close");
 
-document.querySelectorAll(".project-card img").forEach(img => {
-  img.addEventListener("click", () => {
-    modal.style.display = "block";
-    modalImg.src = img.src;
+// Apply selected theme
+themeButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const theme = btn.dataset.theme;
+    document.body.setAttribute('data-theme', theme);
+    themeOptions.classList.remove('active');
+
+    // Icon change & color fix
+    const icon = themeToggle.querySelector('i');
+    icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    themeToggle.style.color = theme === 'dark' ? 'white' : 'black';
   });
 });
 
-closeBtn.addEventListener("click", () => {
-  modal.style.display = "none";
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.theme-container')) {
+    themeOptions.classList.remove('active');
+  }
 });
 
-//back to top button
-const backToTop = document.getElementById("backToTop");
-
-window.addEventListener("scroll", () => {
-  backToTop.style.display = window.scrollY > 300 ? "block" : "none";
-});
-
-backToTop.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
-
-//typing aniamtion in hero section
-const textArray = ["Tech Enthusiast", "Developer", "Student"];
-let textIndex = 0;
+// Typing Effect
+const typingText = document.getElementById("typingText");
+const words = ["CSE Student", "Web Developer", "Programmer", "Tech Enthusiast"];
+let wordIndex = 0;
 let charIndex = 0;
 
-function type() {
-  if (charIndex < textArray[textIndex].length) {
-    document.getElementById("typingText").textContent += textArray[textIndex][charIndex];
+function typeEffect() {
+  if (charIndex < words[wordIndex].length) {
+    typingText.textContent += words[wordIndex].charAt(charIndex);
     charIndex++;
-    setTimeout(type, 100);
+    setTimeout(typeEffect, 100);
   } else {
-    setTimeout(erase, 1500);
+    setTimeout(eraseEffect, 1500);
   }
 }
 
-function erase() {
+function eraseEffect() {
   if (charIndex > 0) {
-    document.getElementById("typingText").textContent =
-      textArray[textIndex].substring(0, charIndex - 1);
+    typingText.textContent = words[wordIndex].substring(0, charIndex - 1);
     charIndex--;
-    setTimeout(erase, 50);
+    setTimeout(eraseEffect, 50);
   } else {
-    textIndex = (textIndex + 1) % textArray.length;
-    setTimeout(type, 500);
+    wordIndex = (wordIndex + 1) % words.length;
+    setTimeout(typeEffect, 300);
   }
 }
 
-document.addEventListener("DOMContentLoaded", type);
+document.addEventListener("DOMContentLoaded", typeEffect);
+// Initialize particles.js on hero background
+document.addEventListener("DOMContentLoaded", function () {
+  if (document.getElementById("particles-js")) {
+    particlesJS("particles-js", {
+      particles: {
+        number: {
+          value: 60,
+          density: {
+            enable: true,
+            value_area: 800
+          }
+        },
+        color: {
+          value: "#ffffff"
+        },
+        shape: {
+          type: "circle"
+        },
+        opacity: {
+          value: 0.5,
+          random: false
+        },
+        size: {
+          value: 3,
+          random: true
+        },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: "#ffffff",
+          opacity: 0.4,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: 2,
+          direction: "none",
+          out_mode: "out"
+        }
+      },
+      interactivity: {
+        detect_on: "canvas",
+        events: {
+          onhover: {
+            enable: true,
+            mode: "grab"
+          },
+          onclick: {
+            enable: true,
+            mode: "push"
+          },
+          resize: true
+        },
+        modes: {
+          grab: {
+            distance: 140,
+            line_linked: {
+              opacity: 0.7
+            }
+          },
+          push: {
+            particles_nb: 4
+          }
+        }
+      },
+      retina_detect: true
+    });
+  }
+});
+// Add floating effect on social icons (optional)
+const icons = document.querySelectorAll(".social-icons a");
+
+icons.forEach((icon, i) => {
+  icon.addEventListener("mouseover", () => {
+    icon.style.transform = "translateX(6px) scale(1.2)";
+  });
+  icon.addEventListener("mouseout", () => {
+    icon.style.transform = "translateX(0) scale(1)";
+  });
+});
+
 
 

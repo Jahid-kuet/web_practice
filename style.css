@@ -20,180 +20,283 @@ section{
     padding: 40px 20px;
 }
 
-/* Header styling */
+/* Header */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #1e1e1e;
-    padding: 15px 40px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(100, 0, 0, 0.9);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+  z-index: 1000;
 }
 
 .logo {
-    height: 50px;
+  height: 40px;
 }
 
-nav {
-    display: flex;
-    gap: 25px;
+#navbar {
+  display: flex;
+  gap: 25px;
 }
 
-nav a {
-    text-decoration: none;
-    color: #ccc;
-    font-size: 1.05rem;
-    font-weight: 500;
-    transition: color 0.3s, transform 0.3s;
+#navbar a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s;
 }
 
-nav a:hover {
-    color: #ff9800;
-    transform: scale(1.05);
+#navbar a.active,
+#navbar a:hover {
+  font-weight: bold;
+  border-bottom: 2px solid white;
 }
 
-/* Mobile menu toggle (hidden on desktop) */
-#menu-toggle {
-    display: none;
-    font-size: 1.8rem;
-    color: white;
-    cursor: pointer;
+/* Resume button */
+.header-right {
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 
-/* Responsive for mobile */
-@media (max-width: 768px) {
-    nav {
-        position: absolute;
-        top: 70px;
-        right: 0;
-        background-color: #1e1e1e;
-        flex-direction: column;
-        gap: 15px;
-        padding: 15px 30px;
-        display: none;
-        border-radius: 0 0 10px 10px;
-    }
-
-    nav.show {
-        display: flex;
-        animation: fadeDown 0.3s ease-out;
-    }
-
-    #menu-toggle {
-        display: block;
-    }
+.resume-btn {
+  background: #7a0000;
+  padding: 6px 12px;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.3s;
 }
 
-/* Animation */
-@keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-15px); }
-    to { opacity: 1; transform: translateY(0); }
+.resume-btn:hover {
+  background: #a10d0d;
 }
-/* end of header styling */
-/*Hero section*/
+
+/* Theme Toggle */
+.theme-container {
+  position: relative;
+}
+
+#themeToggle {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+#themeToggle:hover {
+  transform: rotate(20deg) scale(1.2);
+}
+
+/* Dropdown */
+.theme-options {
+  display: none;
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: white;
+  color: black;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.theme-options.active {
+  display: flex;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.theme-btn {
+  background: none;
+  border: none;
+  padding: 8px 80px;  /* wider */
+  height: 60px;       /* shorter */
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.theme-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+/* Theme Icon Fix */
+body[data-theme="light"] #themeToggle {
+  color: black;
+}
+body[data-theme="dark"] #themeToggle {
+  color: white;
+}
+
+/* Light & Dark Modes */
+body[data-theme="dark"] header {
+  background: rgba(20, 20, 20, 0.9);
+}
+body[data-theme="dark"] #hero {
+  background-color: #121212;
+  color: white;
+}
+body[data-theme="dark"] #navbar a {
+  color: white;
+}
+body[data-theme="dark"] .resume-btn {
+  background: #333;
+}
+
+body[data-theme="light"] header {
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
+}
+body[data-theme="light"] #hero {
+  background-color: #f9f9f9;
+  color: black;
+}
+body[data-theme="light"] #navbar a {
+  color: black;
+}
+body[data-theme="light"] .resume-btn {
+  background: #ddd;
+  color: black;
+}
+
+/* Hero Section */
 #hero {
-    display: flex;
-    flex-wrap: wrap; /* Allows stacking on smaller screens */
-    align-items: center;
-    justify-content: space-between;
-    background-color: #2a2a2a;
-    padding: 60px 20px;
-    color: white;
-    gap: 30px;
-    min-height: 80vh;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  background-color: #0b3c2a;
+  padding: 120px 50px 50px;
+  color: white;
 }
 
-#intro {
-    flex: 1;
-    text-align: left;
-    padding: 20px;
-    animation: slideInLeft 1s ease-out;
+#particles-js {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  top: 0;
+  left: 0;
 }
 
-#intro h1 {
-    font-size: 2.8rem;
-    margin-bottom: 15px;
+.hero-content {
+  z-index: 1;
+  max-width: 70%;
+  padding: 100px;
 }
 
-.highlight {
-    color: #ff9800;
+.hero-content h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-#typingText {
-    font-size: 1.2rem;
-    color: #ccc;
-    min-height: 40px; /* Prevents layout shift during typing animation */
+#hero .highlight {
+  color: #007bff; /* Bootstrap blue */
+  font-weight: bold; /* optional to make it stand out */
 }
 
-/* Image Styling */
+
+.hero-content p {
+  font-size: 1.3rem;
+  margin-top: 10px;
+  min-height: 30px; /* keep space for typing effect */
+}
+
+.hero-content .btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #5a0d0d;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.hero-content .btn:hover {
+  background: #7a0000;
+  transform: scale(1.05);
+}
+
+/* Image Hover */
 #myimg {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    animation: slideInRight 1s ease-out;
+  z-index: 1;
 }
 
 #myimg img {
-    width: 300px;
-    height: 400px;
-    object-fit: cover;
-    border-radius: 20px;
-    box-shadow: 0px 8px 20px rgba(0,0,0,0.5);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  max-width: 350px;
+  border-radius: 10px;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 #myimg img:hover {
-    transform: scale(1.05);
-    box-shadow: 0px 12px 25px rgba(255, 152, 0, 0.4);
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
 }
 
-/* Responsive Adjustments */
-@media (max-width: 900px) {
-    #hero {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    #intro {
-        margin: 0;
-        text-align: center;
-    }
-
-    #myimg img {
-        width: 250px;
-        height: 350px;
-    }
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
 }
 
-@media (max-width: 500px) {
-    #intro h1 {
-        font-size: 2rem;
-    }
-
-    #typingText {
-        font-size: 1rem;
-    }
-
-    #myimg img {
-        width: 200px;
-        height: 280px;
-    }
+/* ==== Social Sidebar ==== */
+.social-icons {
+  position: fixed;
+  left: 20px;               /* stick to left */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;   /* vertical stack */
+  gap: 18px;
+  z-index: 999;
 }
 
-/* Animations */
-@keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-50px); }
-    to { opacity: 1; transform: translateX(0); }
+.social-icons a {
+  color: white;
+  font-size: 1.6rem;
+  transition: transform 0.3s, color 0.3s, margin-left 0.3s;
 }
 
-@keyframes slideInRight {
-    from { opacity: 0; transform: translateX(50px); }
-    to { opacity: 1; transform: translateX(0); }
+.social-icons a:hover {
+  color: #007bff;           /* blue highlight on hover */
+  transform: scale(1.2);    /* slight zoom */
+  margin-left: 5px;         /* move right */
 }
-/* hero section ends here */
+
+/* Special case for GitHub icon */
+.social-icons a:first-child {
+  margin-left: 8px;   /* permanently shifted a bit right */
+}
+
+/* Dark mode adjustments */
+body[data-theme="light"] .social-icons a {
+  color: black;
+}
+
+
 /* About Section */
 #about {
     background-color: #1e1e1e;

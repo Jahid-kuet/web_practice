@@ -19,29 +19,58 @@
   </head>
   <body>
 <header>
-    <img src="img/logo1.png" alt="logo" class="logo" />
-    
-    <nav id="navbar">
-        <a href="#about">About</a>
-        <a href="#education">Education</a>
-        <a href="#expertise">Expertise</a>
-        <a href="#myworks">My Works</a>
-        <a href="#contact">Contact</a>
-    </nav>
+  <img src="img/logo1.png" alt="Logo" class="logo" />
+  <nav id="navbar">
+    <a href="#hero" class="active">Home</a>
+    <a href="#about">About</a>
+    <a href="#education">Education</a>
+    <a href="#expertise">Technical Skills</a>
+    <a href="#myworks">Projects</a>
+    <a href="#certifications">Certifications & Achievements</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div class="header-right">
+    <a href="resume.pdf" target="_blank" class="resume-btn">
+      <i class="fas fa-download"></i> Resume
+    </a>
 
-    <!-- Hamburger menu for mobile -->
-    <div id="menu-toggle" onclick="toggleMenu()">&#9776;</div>
+    <!-- Theme Toggle with Dropdown -->
+    <div class="theme-container">
+      <button id="themeToggle">
+        <i class="fas fa-moon"></i>
+      </button>
+      <div class="theme-options" id="themeOptions">
+        <button class="theme-btn" data-theme="light">Light Mode</button>
+        <button class="theme-btn" data-theme="dark">Dark Mode</button>
+      </div>
+    </div>
+  </div>
 </header>
 
-<section id="hero" class="fade_in">
-    <div id="intro">
-        <h1>Hi, I'm <span class="highlight">Jahid Hasan</span></h1>
-        <!-- typing animation in hero section -->
-        <p id="typingText"></p>
-    </div>
-    <div id="myimg">
-        <img src="img/2107064.jpg" alt="My Photo" />
-    </div>
+<section id="hero">
+  <div id="particles-js"></div>
+    <!-- Social Sidebar -->
+  <div class="social-icons">
+    <a href="https://github.com/yourusername" target="_blank"><i class="fab fa-github"></i></a>
+    <a href="https://linkedin.com/in/yourusername" target="_blank"><i class="fab fa-linkedin"></i></a>
+    <a href="https://instagram.com/yourusername" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="https://facebook.com/yourusername" target="_blank"><i class="fab fa-facebook"></i></a>
+    <a href="https://twitter.com/yourusername" target="_blank"><i class="fab fa-twitter"></i></a>
+    <a href="mailto:your@email.com"><i class="fas fa-envelope"></i></a>
+  </div>
+  <div class="hero-content">
+    <h1>Hi, I'm <span class="highlight">Jahid Hasan</span></h1>
+    <p id="typingText"></p>
+    <p class="intro-text">
+      A passionate Mobile Engineer specializing in <b>React Native</b> and <b>full-stack development</b>. 
+      With hands-on experience building cross-platform mobile apps, I love creating elegant, scalable, 
+      and high-performance solutions that improve user experiences.
+    </p>
+    <a href="#myworks" class="btn">View My Work</a>
+  </div>
+  <div id="myimg">
+    <img src="img/2107064.jpg" alt="My Photo" />
+  </div>
 </section>
 
 <section id="about" class="fade_in">
@@ -97,8 +126,7 @@
   </div>
 </section>
 
-
-    <section id="expertise" class="fade_in">
+     <section id="expertise" class="fade_in">
       <h2>My Expertise</h2>
 
       <!-- Programming Languages -->
@@ -178,9 +206,9 @@
         </div>
       </div>
 
-      <!-- Platforms / Practice -->
+     <!-- Problem Solving & Projects -->
       <div class="skill-category">
-        <h3>Problem Solving & Projects</h3>
+     </div>   <h3>Problem Solving & Projects</h3>
         <div class="skill-list">
           <div class="skill-item">
             <img src="img/codeforces.png" alt="Codeforces Logo" />
@@ -198,8 +226,68 @@
       </div>
     </section>
 
+  <!-- ===== TECHNICAL SKILLS ===== -->
+<section id="technical-skills">
+  <h2 class="section-title">Technical Skills</h2>
+  <div class="skills-container">
+    <!-- Frontend -->
+    <div class="skill-card">
+      <h3>Frontend</h3>
+      <ul>
+        <li><img src="img/react.png"/> React <span class="badge expert">Expert</span></li>
+        <li><img src="img/reactnative.png"/> React Native <span class="badge expert">Expert</span></li>
+        <li><img src="img/next.png"/> Next.js <span class="badge advanced">Advanced</span></li>
+        <li><img src="img/typescript.png"/> TypeScript <span class="badge advanced">Advanced</span></li>
+        <li><img src="img/js.png"/> JavaScript <span class="badge expert">Expert</span></li>
+        <li><img src="img/tailwind.png"/> Tailwind CSS <span class="badge advanced">Advanced</span></li>
+      </ul>
+    </div>
+
+    <!-- Backend -->
+    <div class="skill-card">
+      <h3>Backend</h3>
+      <ul>
+        <li><img src="img/node.png"/> Node.js <span class="badge advanced">Advanced</span></li>
+        <li><img src="img/python.png"/> Python <span class="badge intermediate">Intermediate</span></li>
+        <li><img src="img/graphql.png"/> GraphQL <span class="badge advanced">Advanced</span></li>
+      </ul>
+    </div>
+
+    <!-- Database -->
+    <div class="skill-card">
+      <h3>Database</h3>
+      <ul>
+        <li><img src="img/mongo.png"/> MongoDB <span class="badge advanced">Advanced</span></li>
+        <li><img src="img/postgres.png"/> PostgreSQL <span class="badge intermediate">Intermediate</span></li>
+        <li><img src="img/firebase.png"/> Firebase <span class="badge advanced">Advanced</span></li>
+      </ul>
+    </div>
+
+    <!-- Mobile & Tools -->
+    <div class="skill-card">
+      <h3>Mobile & Tools</h3>
+      <ul>
+        <li><img src="img/expo.png"/> Expo <span class="badge advanced">Advanced</span></li>
+        <li><img src="img/redux.png"/> Redux <span class="badge advanced">Advanced</span></li>
+        <li><img src="img/git.png"/> Git <span class="badge advanced">Advanced</span></li>
+        <li><img src="img/docker.png"/> Docker <span class="badge intermediate">Intermediate</span></li>
+        <li><img src="img/aws.png"/> AWS <span class="badge intermediate">Intermediate</span></li>
+      </ul>
+    </div>
+
+    <!-- Blockchain -->
+    <div class="skill-card">
+      <h3>Blockchain</h3>
+      <ul>
+        <li><img src="img/solidity.png"/> Solidity <span class="badge intermediate">Intermediate</span></li>
+        <li><img src="img/web3.png"/> Web3.js <span class="badge intermediate">Intermediate</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
    <section id="myworks" class="fade_in">
-  <h2>My Works</h2>
+  <h2>My Works</h2> -->
 
   <!-- GitHub Section -->
   <div class="works-category">
@@ -292,7 +380,6 @@
   </div>
 </section>
 
-
     <section id="contact" class="fade_in">
       <h2>Contact</h2>
       <div class="contact-container">
@@ -309,7 +396,7 @@
               >LinkedIn</a
             >
           </p>
-        </div>
+        </div> 
 
         <!-- Contact Form -->
         <form
@@ -331,6 +418,7 @@
       </div>
     </section>
 
+
     <footer>
       <p>@2025 Jahid Hasan | All Rights Reserved</p>
     </footer>
@@ -342,6 +430,7 @@
     <!--back on top button-->
     <button id="backToTop">↑</button>
     <!-- adding js -->
+     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
     <script src="first.js"></script>
   </body>
 </html>
