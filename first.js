@@ -138,5 +138,92 @@ icons.forEach((icon, i) => {
   });
 });
 
+// Fade-in effect on scroll in about section
+document.addEventListener("DOMContentLoaded", function () {
+  const fadeElements = document.querySelectorAll(".fade_in");
+  const socialIcons = document.querySelector(".hero-social-icons");
+  const aboutSection = document.querySelector("#about");
+
+  function handleScroll() {
+    // Fade in about section
+    fadeElements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= window.innerHeight - 100) {
+        el.classList.add("show");
+      }
+    });
+
+    // Change social icons color when overlapping about section
+    const aboutRect = aboutSection.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+
+    if (aboutRect.top <= windowHeight / 1.2 && aboutRect.bottom >= 0) {
+      socialIcons.classList.add("about-active");
+    } else {
+      socialIcons.classList.remove("about-active");
+    }
+  }
+
+  window.addEventListener("scroll", handleScroll);
+  handleScroll();
+});
+//education
+document.addEventListener("DOMContentLoaded", () => {
+  const fadeInSections = document.querySelectorAll(".fade_in");
+  const revealOnScroll = () => {
+    fadeInSections.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 100) {
+        section.classList.add("show");
+      }
+    });
+  };
+  window.addEventListener("scroll", revealOnScroll);
+  revealOnScroll(); // Run on load
+});
+//technical skills
+document.addEventListener('DOMContentLoaded', () => {
+const cards = document.querySelectorAll('.skill-card');
+const observer = new IntersectionObserver(entries => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, { threshold: 0.1 });
+
+
+cards.forEach(card => {
+card.classList.add('fade-in');
+observer.observe(card);
+});
+});
+//my works
+// Fade-in animation when scrolling
+document.addEventListener("scroll", () => {
+  document.querySelectorAll(".project-card").forEach(card => {
+    const rect = card.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 50) {
+      card.classList.add("visible");
+    }
+  });
+});
+//contact
+// Fade-in animation on scroll
+document.addEventListener("scroll", () => {
+  document.querySelectorAll(".contact-info, .contact-form").forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 50) {
+      el.classList.add("visible");
+    }
+  });
+});
+
+
+
+
+
+
+
 
 
