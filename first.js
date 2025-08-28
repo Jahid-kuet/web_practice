@@ -182,22 +182,23 @@ document.addEventListener("DOMContentLoaded", () => {
   revealOnScroll(); // Run on load
 });
 //technical skills
-document.addEventListener('DOMContentLoaded', () => {
-const cards = document.querySelectorAll('.skill-card');
-const observer = new IntersectionObserver(entries => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-entry.target.classList.add('visible');
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const fadeElements = document.querySelectorAll(".skill-card");
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  fadeElements.forEach((el) => observer.observe(el));
 });
-}, { threshold: 0.1 });
 
 
-cards.forEach(card => {
-card.classList.add('fade-in');
-observer.observe(card);
-});
-});
+
 //my works
 // Fade-in animation when scrolling
 document.addEventListener("scroll", () => {
@@ -208,6 +209,23 @@ document.addEventListener("scroll", () => {
     }
   });
 });
+//certification
+// Certifications scroll animation
+document.addEventListener("DOMContentLoaded", () => {
+  const certCards = document.querySelectorAll(".cert-card");
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  }, { threshold: 0.2 });
+
+  certCards.forEach(card => observer.observe(card));
+});
+
+
 //contact
 // Fade-in animation on scroll
 document.addEventListener("scroll", () => {
