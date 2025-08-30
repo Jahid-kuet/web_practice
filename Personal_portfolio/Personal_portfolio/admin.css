@@ -1,0 +1,100 @@
+﻿/* ====== Admin Panel Styling ====== */
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    background: #f9f9f9;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background: #222;
+    color: #fff;
+    height: 100vh;
+    padding: 20px;
+    position: fixed;
+}
+
+    .sidebar h2 {
+        margin-bottom: 20px;
+    }
+
+    .sidebar nav a {
+        display: block;
+        color: #fff;
+        padding: 10px;
+        margin: 5px 0;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+        .sidebar nav a:hover {
+            background: #444;
+        }
+
+/* Main content */
+.content {
+    margin-left: 240px;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+h1, h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+    table th, table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    table th {
+        background: #eee;
+    }
+
+/* Buttons */
+.add-btn, .edit-btn, .delete-btn {
+    padding: 6px 12px;
+    margin: 2px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.add-btn {
+    background: #28a745;
+    color: #fff;
+}
+
+.edit-btn {
+    background: #007bff;
+    color: #fff;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: #fff;
+}
+
+.add-btn:hover {
+    background: #218838;
+}
+
+.edit-btn:hover {
+    background: #0056b3;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}

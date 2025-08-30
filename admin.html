@@ -3,94 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel - Portfolio</title>
+  <title>Admin Panel</title>
   <link rel="stylesheet" href="admin.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"/>
 </head>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <h2>Admin Panel</h2>
-    <nav>
-      <a href="#dashboard"><i class="fas fa-home"></i> Dashboard</a>
-      <a href="#projects"><i class="fas fa-folder"></i> Projects</a>
-      <a href="#skills"><i class="fas fa-code"></i> Skills</a>
-      <a href="#certifications"><i class="fas fa-award"></i> Certifications</a>
-      <a href="index.html"><i class="fas fa-globe"></i> Back to Portfolio</a>
-    </nav>
-  </aside>
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal active">
+    <form class="admin-login-form" id="adminLoginForm" autocomplete="off">
+      <h2>Admin Login</h2>
+      <div class="input-group">
+        <label for="admin-username">Username</label>
+        <input type="text" id="admin-username" name="username" required />
+      </div>
+      <div class="input-group">
+        <label for="admin-password">Password</label>
+        <input type="password" id="admin-password" name="password" required />
+      </div>
+      <button type="submit">Login</button>
+      <div id="adminLoginMsg"></div>
+    </form>
+  </div>
 
-  <!-- Main Content -->
-  <main class="content">
-    <section id="dashboard">
-      <h1>Welcome, Admin</h1>
-      <p>Use the sidebar to manage your portfolio content.</p>
-    </section>
+  <!-- Admin Panel -->
+<div class="sidebar">
+  <h2>Admin Panel</h2>
+  <nav>
+    <a href="#">Dashboard</a>
+    <a href="#">Users</a>
+    <a href="#" id="changePwdLink">Change Password</a>
+    <a href="#" id="logoutBtn">Logout</a>
+  </nav>
+</div>
+  <div class="content">
+    <h1>Manage Users</h1>
+    <button class="add-btn" id="addUserBtn">+ Add User</button>
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- JS will populate -->
+      </tbody>
+    </table>
+  </div>
 
-    <!-- Projects -->
-    <section id="projects">
-      <h2>Manage Projects</h2>
-      <button class="add-btn">+ Add Project</button>
-      <table>
-        <thead>
-          <tr><th>Title</th><th>Description</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Face Detection</td>
-            <td>OpenCV real-time face detection.</td>
-            <td>
-              <button class="edit-btn">Edit</button>
-              <button class="delete-btn">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+  <!-- Add/Edit User Modal -->
+  <div id="userModal" class="modal">
+    <form class="user-form" id="userForm">
+      <h2 id="userFormTitle">Add User</h2>
+      <input type="hidden" id="userId" />
+      <div class="input-group">
+        <label for="userName">Name</label>
+        <input type="text" id="userName" required />
+      </div>
+      <div class="input-group">
+        <label for="userEmail">Email</label>
+        <input type="email" id="userEmail" required />
+      </div>
+      <div class="input-group">
+        <label for="userRole">Role</label>
+        <input type="text" id="userRole" required />
+      </div>
+      <button type="submit">Save</button>
+      <button type="button" id="cancelUserBtn" class="delete-btn">Cancel</button>
+    </form>
+  </div>
+  <!-- Add Change Password Modal -->
+<div id="pwdModal" class="modal">
+  <form class="user-form" id="pwdForm">
+    <h2>Change Password</h2>
+    <div class="input-group">
+      <label for="oldPwd">Old Password</label>
+      <input type="password" id="oldPwd" required />
+    </div>
+    <div class="input-group">
+      <label for="newPwd">New Password</label>
+      <input type="password" id="newPwd" required />
+    </div>
+    <button type="submit">Update Password</button>
+    <button type="button" id="cancelPwdBtn" class="delete-btn">Cancel</button>
+    <div id="pwdMsg"></div>
+  </form>
+</div>
 
-    <!-- Skills -->
-    <section id="skills">
-      <h2>Manage Skills</h2>
-      <button class="add-btn">+ Add Skill</button>
-      <table>
-        <thead>
-          <tr><th>Skill</th><th>Level</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Python</td>
-            <td>Advanced</td>
-            <td>
-              <button class="edit-btn">Edit</button>
-              <button class="delete-btn">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Certifications -->
-    <section id="certifications">
-      <h2>Manage Certifications</h2>
-      <button class="add-btn">+ Add Certification</button>
-      <table>
-        <thead>
-          <tr><th>Title</th><th>Year</th><th>Actions</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Dean’s Award – 1st Year</td>
-            <td>2023</td>
-            <td>
-              <button class="edit-btn">Edit</button>
-              <button class="delete-btn">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
+  <script src="admin.js"></script>
 </body>
 </html>
-<!-- Back to Top Button -->
-<button id="backToTop" title="Back to Top"><i class="fas fa-chevron-up"></i></button>

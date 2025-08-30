@@ -25,6 +25,36 @@ function eraseRole() {
 }
 typeRole();
 
+// Responsive Hamburger Menu
+const navToggle = document.getElementById("navToggle");
+const navbar = document.getElementById("navbar");
+
+if (navToggle && navbar) {
+  navToggle.addEventListener("click", () => {
+    navbar.classList.toggle("active");
+    navToggle.classList.toggle("open");
+  });
+
+  // Close nav when clicking a link (on mobile)
+  document.querySelectorAll("#navbar a").forEach(link => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth < 900) {
+        navbar.classList.remove("active");
+        navToggle.classList.remove("open");
+      }
+    });
+  });
+}
+
+// Hero image tap effect for mobile
+const heroImg = document.querySelector("#myimg img");
+if (heroImg) {
+  heroImg.addEventListener("touchstart", () => {
+    heroImg.classList.add("img-tap");
+    setTimeout(() => heroImg.classList.remove("img-tap"), 400);
+  });
+}
+
 // ==== Theme Toggle ====
 const themeToggle = document.getElementById("themeToggle");
 const themeOptions = document.getElementById("themeOptions");
@@ -59,30 +89,33 @@ const closeModal = document.querySelector(".modal .close");
 
 document.querySelectorAll(".project-card img, .cert-card img").forEach(img => {
   img.addEventListener("click", e => {
-    modal.style.display = "block";
+    modal.classList.add("active");
     modalImg.src = e.target.src;
+    modalImg.alt = e.target.alt || "";
   });
 });
 
 closeModal.addEventListener("click", () => {
-  modal.style.display = "none";
+  modal.classList.remove("active");
+  modalImg.src = "";
 });
 window.addEventListener("click", e => {
-  if (e.target === modal) modal.style.display = "none";
+  if (e.target === modal) {
+    modal.classList.remove("active");
+    modalImg.src = "";
+  }
 });
 
-// ==== FADE-IN ON SCROLL ====
-const faders = document.querySelectorAll(".fade-in");
-
+// ==== Fade-in Animation on Scroll ====
+const faders = document.querySelectorAll('.fade-in');
 const appearOptions = {
   threshold: 0.2,
   rootMargin: "0px 0px -50px 0px"
 };
-
-const appearOnScroll = new IntersectionObserver((entries, observer) => {
+const appearOnScroll = new IntersectionObserver(function(entries, observer) {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
-    entry.target.classList.add("visible");
+    entry.target.classList.add('visible');
     observer.unobserve(entry.target);
   });
 }, appearOptions);
@@ -106,4 +139,39 @@ document.querySelectorAll("a[href^='#']").forEach(anchor => {
     const target = document.querySelector(anchor.getAttribute("href"));
     target.scrollIntoView({ behavior: "smooth" });
   });
+});
+
+// Contact form validation and feedback
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector(".contact-form");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      // Only show message, don't actually send email for demo
+      e.preventDefault();
+      // Simple validation
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const message = form.message.value.trim();
+      if (!name || !email || !message) {
+        showContactMessage("Please fill in all fields.", false);
+        return;
+      }
+      // Show success message
+      showContactMessage("Thank you for reaching out! I'll get back to you soon.", true);
+      form.reset();
+    });
+  }
+
+  function showContactMessage(msg, success) {
+    let msgDiv = document.getElementById("contactMsg");
+    if (!msgDiv) {
+      msgDiv = document.createElement("div");
+      msgDiv.id = "contactMsg";
+      msgDiv.style.marginTop = "12px";
+      msgDiv.style.fontWeight = "500";
+      form.appendChild(msgDiv);
+    }
+    msgDiv.textContent = msg;
+    msgDiv.style.color = success ? "#0077b5" : "#e53e3e";
+  }
 });
