@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace Personal_portfolio
 {
@@ -11,7 +6,7 @@ namespace Personal_portfolio
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            // Code for loading admin page
         }
     }
 }

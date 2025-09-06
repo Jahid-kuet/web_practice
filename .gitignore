@@ -1,0 +1,92 @@
+# ASP.NET WebForms .gitignore
+
+# Visual Studio
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# Build results
+[Bb]in/
+[Oo]bj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# Publish / deployment
+publish/
+PublishProfiles/
+*.Publish.xml
+*.pubxml.user
+artifacts/
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+packages.config.user
+
+# ASP.NET / WebForms
+App_Data/
+*.mdf
+*.ldf
+*.dbmdl
+*.PublishSettings
+
+# IIS Express / local server files
+/.vs/
+IISExpress/
+IISLogs/
+*.vspscc
+*.vssscc
+
+# Resharper / JetBrains
+_ReSharper*/
+*.resharper
+.idea/
+*.sln.iml
+
+# Node / front-end
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.pnpm-debug.log
+
+# Environment & secrets
+.env
+.env.*
+appsettings*.json
+secrets.json
+*.pfx
+*.cer
+*.key
+*.pem
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+
+# Temporary / cache / system
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+~$*
+*.bak
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Misc
+*.userprefs
+*.cache
+*.log
+*.zip

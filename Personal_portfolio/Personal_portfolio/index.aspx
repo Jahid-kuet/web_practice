@@ -1,23 +1,34 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="index.aspx.cs" Inherits="Personal_portfolio.WebForm1" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="index.aspx.cs" Inherits="index" %>
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
-      integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <title>My Portfolio</title>
+    <meta name="description" content="Jahid Hasan - Full Stack Developer & AI Enthusiast Portfolio" />
+    <meta name="keywords" content="web developer, AI, machine learning, full stack, portfolio" />
+    <meta name="author" content="Jahid Hasan" />
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="style1.css" />
+    <link rel="stylesheet" href="admin.css" />
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0077b6">
+    
+    <title>Jahid Hasan - Portfolio | Full Stack Developer & AI Enthusiast</title>
   </head>
   <body>
     <header>
@@ -47,6 +58,16 @@
           </div>
         </div>
       </div>
+      <button id="navToggle" class="hamburger" aria-label="Open navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <button
+        id="adminMenuBtn"
+        class="admin-menu-btn"
+        aria-label="Open admin menu"
+      >
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
     </header>
 
     <section id="hero">
@@ -74,10 +95,10 @@
         <h1>Hi, I'm <span class="highlight">Jahid Hasan</span></h1>
         <p id="typingText"></p>
         <p class="intro-text">
-          A passionate Mobile Engineer specializing in <b>React Native</b> and
-          <b>full-stack development</b>. With hands-on experience building
-          cross-platform mobile apps, I love creating elegant, scalable, and
-          high-performance solutions that improve user experiences.
+          I’m a creative problem solver and passionate engineer, blending code
+          and design to build impactful mobile and web experiences. I love
+          learning new technologies, collaborating on innovative projects, and
+          turning ideas into reality.
         </p>
         <a href="#myworks" class="btn">View My Work</a>
       </div>
@@ -140,7 +161,7 @@
         <!-- Primary -->
         <div class="edu-item fade-in">
           <img
-            src="img/primary_logo1.webp"
+            src="img/primary_logo1.jpg"
             alt="Shiber Bazar Govt. Primary School Logo"
             class="edu-logo"
           />
@@ -216,30 +237,51 @@
             <li>
               <img src="img/letter-c.png" alt="C" /> C
               <span class="badge expert">Expert</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 80%"></span
+              ></span>
             </li>
             <li>
               <img src="img/c++.png" alt="C++" /> C++
               <span class="badge expert">Expert</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 80%"></span
+              ></span>
             </li>
             <li>
               <img src="img/java.png" alt="Java" /> Java
               <span class="badge advanced">Advanced</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 70%"></span
+              ></span>
             </li>
             <li>
               <img src="img/machine.png" alt="Assembly" /> Assembly
               <span class="badge intermediate">Intermediate</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 60%"></span
+              ></span>
             </li>
             <li>
               <img src="img/python.png" alt="Python" /> Python
               <span class="badge advanced">Advanced</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 70%"></span
+              ></span>
             </li>
             <li>
               <img src="img/c-sharp.png" alt="C#" /> C#
               <span class="badge intermediate">Intermediate</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 60%"></span
+              ></span>
             </li>
             <li>
               <img src="img/php.png" alt="PHP" /> PHP
               <span class="badge intermediate">Intermediate</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 60%"></span
+              ></span>
             </li>
           </ul>
         </div>
@@ -251,18 +293,30 @@
             <li>
               <img src="img/html-5.png" alt="HTML" /> HTML
               <span class="badge expert">Expert</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 80%"></span
+              ></span>
             </li>
             <li>
               <img src="img/css.png" alt="CSS" /> CSS
               <span class="badge expert">Expert</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 80%"></span
+              ></span>
             </li>
             <li>
               <img src="img/java-script.png" alt="JavaScript" /> JavaScript
               <span class="badge advanced">Advanced</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 70%"></span
+              ></span>
             </li>
             <li>
               <img src="img/web.png" alt="ASP.NET" /> ASP.NET
               <span class="badge intermediate">Intermediate</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 60%"></span
+              ></span>
             </li>
           </ul>
         </div>
@@ -274,14 +328,23 @@
             <li>
               <img src="img/machine-learning.png" alt="Machine Learning" />
               Machine Learning <span class="badge advanced">Advanced</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 70%"></span
+              ></span>
             </li>
             <li>
               <img src="img/artificial-intelligence.png" alt="AI" /> Artificial
               Intelligence <span class="badge advanced">Advanced</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 70%"></span
+              ></span>
             </li>
             <li>
               <img src="img/computer.png" alt="Deep Learning" /> Deep Learning
               <span class="badge intermediate">Intermediate</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 60%"></span
+              ></span>
             </li>
           </ul>
         </div>
@@ -293,14 +356,23 @@
             <li>
               <img src="img/codeforces.png" alt="Codeforces" /> Codeforces
               <span class="badge advanced">Advanced</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 70%"></span
+              ></span>
             </li>
             <li>
               <img src="img/leetcode.png" alt="LeetCode" /> LeetCode
               <span class="badge advanced">Advanced</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 80%"></span
+              ></span>
             </li>
             <li>
               <img src="img/drone.png" alt="Drone Systems" /> Drone Systems
               <span class="badge intermediate">Intermediate</span>
+              <span class="skill-bar"
+                ><span class="skill-bar-fill" style="width: 60%"></span
+              ></span>
             </li>
           </ul>
         </div>
@@ -312,7 +384,6 @@
 
       <!-- GitHub Section -->
       <div class="works-category">
-        <h3>GitHub Projects</h3>
         <div class="project-grid">
           <div class="project-card">
             <img
@@ -335,7 +406,7 @@
           </div>
 
           <div class="project-card">
-            <img src="img/numerical.avif" alt="Numerical Method Lab" />
+            <img src="img/numerical.jpg" alt="Numerical Method Lab" />
             <div class="project-content">
               <h4>Numerical Method Lab</h4>
               <p>
@@ -455,61 +526,72 @@
         </div>
       </div>
     </section>
-<!-- ===== CERTIFICATIONS & ACHIEVEMENTS ===== -->
-<section id="certifications">
-  <h2 class="section-title">Certifications & Achievements</h2>
-  <div class="certifications-container">
-    
-    <!-- Dean's Award 1st Year -->
-    <div class="cert-card fade-in">
-      <img src="img/deans1.jpg" alt="Dean's Award 1st Year" />
-      <div class="cert-content">
-        <h3>Dean's Award – 1st Year</h3>
-        <p>Recognized for exceptional academic performance with CGPA above 3.75.</p>
-        <span class="date">2023</span>
-      </div>
-    </div>
+    <!-- ===== CERTIFICATIONS & ACHIEVEMENTS ===== -->
+    <section id="certifications">
+      <h2 class="section-title">Certifications & Achievements</h2>
+      <div class="certifications-container">
+        <!-- Dean's Award 1st Year -->
+        <div class="cert-card fade-in">
+          <img src="img/deans1.jpg" alt="Dean's Award 1st Year" />
+          <div class="cert-content">
+            <h3>Dean's Award – 1st Year</h3>
+            <p>
+              Recognized for exceptional academic performance with CGPA above
+              3.75.
+            </p>
+            <span class="date">2023</span>
+          </div>
+        </div>
 
-    <!-- Dean's Award 2nd Year -->
-    <div class="cert-card fade-in">
-      <img src="img/certi.jpg" alt="Dean's Award 2nd Year" />
-      <div class="cert-content">
-        <h3>Dean's Award – 2nd Year</h3>
-        <p>Achieved the Dean's Award again for CGPA above 3.75 across the year.</p>
-        <span class="date">2024</span>
-      </div>
-    </div>
+        <!-- Dean's Award 2nd Year -->
+        <div class="cert-card fade-in">
+          <img src="img/certi1.jpg" alt="Dean's Award 2nd Year" />
+          <div class="cert-content">
+            <h3>Dean's Award – 2nd Year</h3>
+            <p>
+              Achieved the Dean's Award again for CGPA above 3.75 across the
+              year.
+            </p>
+            <span class="date">2024</span>
+          </div>
+        </div>
 
-    <!-- Competitive Hackathon -->
-    <div class="cert-card fade-in">
-      <img src="img/certi3.jpg" alt="Hackathon Winner" />
-      <div class="cert-content">
-        <h3>Hackathon Winner</h3>
-        <p>1st place at KUET Inter-University Hackathon with an AI-powered project.</p>
-        <span class="date">2024</span>
-      </div>
-    </div>
+        <!-- Competitive Hackathon -->
+        <div class="cert-card fade-in">
+          <img src="img/certi3.jpg" alt="Hackathon Winner" />
+          <div class="cert-content">
+            <h3>Hackathon Winner</h3>
+            <p>
+              1st place at KUET Inter-University Hackathon with an AI-powered
+              project.
+            </p>
+            <span class="date">2024</span>
+          </div>
+        </div>
 
-    <!-- Machine Learning Specialization -->
-    <div class="cert-card fade-in">
-      <img src="img/deans1.jpg" alt="Machine Learning Specialization" />
-      <div class="cert-content">
-        <h3>Machine Learning Specialization</h3>
-        <p>Completed Coursera's ML Specialization by Andrew Ng, gaining hands-on ML experience.</p>
-        <span class="date">2023</span>
+        <!-- Machine Learning Specialization -->
+        <div class="cert-card fade-in">
+          <img src="img/deans1.jpg" alt="Machine Learning Specialization" />
+          <div class="cert-content">
+            <h3>Machine Learning Specialization</h3>
+            <p>
+              Completed Coursera's ML Specialization by Andrew Ng, gaining
+              hands-on ML experience.
+            </p>
+            <span class="date">2023</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ==== IMAGE MODAL ==== -->
-<div id="imgModal" class="modal">
-  <span class="close">&times;</span>
-  <img class="modal-content" id="modalImage" />
-</div>
+    <!-- ==== IMAGE MODAL ==== -->
+    <div id="imgModal" class="modal">
+      <span class="close">&times;</span>
+      <img class="modal-content" id="modalImage" />
+    </div>
 
     <section id="contact" class="fade_in">
-      <h2>Contact</h2>
+      <h2 class="section-title">Contact</h2>
       <div class="contact-container">
         <!-- Contact Info -->
         <div class="contact-info">
@@ -562,5 +644,9 @@
     <!-- adding js -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
     <script src="first1.js"></script>
+    <div id="adminModalContainer"></div>
+    <script src="admin.js"></script>
   </body>
 </html>
+
+

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Admin Panel Features Demo</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        li {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        li::before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🚀 Modern Admin Panel</h1>
+        <p class="subtitle">Enhanced with modern design patterns and responsive features</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Responsive Design</h3>
+                <ul>
+                    <li>Mobile-first approach</li>
+                    <li>Touch-friendly navigation</li>
+                    <li>Swipe gestures support</li>
+                    <li>Adaptive layouts</li>
+                    <li>Mobile sidebar overlay</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Modern UI/UX</h3>
+                <ul>
+                    <li>Glass morphism effects</li>
+                    <li>Smooth animations</li>
+                    <li>Gradient backgrounds</li>
+                    <li>Modern color palette</li>
+                    <li>CSS custom properties</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Progressive Web App</h3>
+                <ul>
+                    <li>Service Worker caching</li>
+                    <li>Offline functionality</li>
+                    <li>App installation</li>
+                    <li>Push notifications</li>
+                    <li>Background sync</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">♿</div>
+                <h3>Accessibility</h3>
+                <ul>
+                    <li>ARIA labels and roles</li>
+                    <li>Keyboard navigation</li>
+                    <li>Focus management</li>
+                    <li>Screen reader support</li>
+                    <li>High contrast support</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🌙</div>
+                <h3>Theme System</h3>
+                <ul>
+                    <li>Light/Dark mode toggle</li>
+                    <li>System preference detection</li>
+                    <li>Smooth transitions</li>
+                    <li>CSS custom properties</li>
+                    <li>Persistent preferences</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⌨️</div>
+                <h3>Keyboard Shortcuts</h3>
+                <ul>
+                    <li>Ctrl+Alt+D - Dashboard</li>
+                    <li>Ctrl+Alt+S - Skills</li>
+                    <li>Ctrl+Alt+P - Projects</li>
+                    <li>Ctrl+Alt+C - Certifications</li>
+                    <li>Ctrl+Alt+T - Theme toggle</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="admin.html" class="demo-link">🔗 Open Admin Panel</a>
+        </div>
+        
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 10px;">
+            <h3>🔐 Login Credentials</h3>
+            <p><strong>Username:</strong> admin</p>
+            <p><strong>Password:</strong> admin123</p>
+        </div>
+    </div>
+</body>
+</html>
