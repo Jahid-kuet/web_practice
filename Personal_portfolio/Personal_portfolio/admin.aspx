@@ -18,6 +18,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <script src="scripts/sync.js"></script>
 </head>
 <body>
   <!-- Login Modal -->

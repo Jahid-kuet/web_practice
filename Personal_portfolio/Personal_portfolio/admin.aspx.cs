@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -44,7 +44,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string AuthenticateAdmin(string username, string password)
         {
             try
@@ -90,7 +90,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string ChangePassword(string currentPassword, string newPassword)
         {
             try
@@ -140,7 +140,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string ResetPasswordWithSecret(string secretKey, string newPassword)
         {
             try
@@ -177,7 +177,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string Logout()
         {
             try
@@ -210,7 +210,7 @@ namespace PortfolioWebsite
 
         #region CRUD Operations - Technical Skills
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string GetAllSkills()
         {
             if (!IsAuthenticated()) return GetAuthError();
@@ -265,7 +265,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string AddSkill(string skillName, string categoryName, string skillLevel, 
             string iconImage, string skillDescription, int displayOrder)
         {
@@ -314,7 +314,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string UpdateSkill(int skillId, string skillName, string categoryName, string skillLevel, 
             string iconImage, string skillDescription, int displayOrder, bool isActive)
         {
@@ -371,7 +371,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string DeleteSkill(int skillId)
         {
             if (!IsAuthenticated()) return GetAuthError();
@@ -418,7 +418,7 @@ namespace PortfolioWebsite
 
         #region CRUD Operations - Projects
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string GetAllProjects()
         {
             if (!IsAuthenticated()) return GetAuthError();
@@ -480,7 +480,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string AddProject(string projectTitle, string projectDescription, string projectImage,
             string gitHubLink, string liveDemoLink, string techStack, string projectType,
             string startDate, string endDate, bool isCompleted, bool isFeatured, int displayOrder)
@@ -538,7 +538,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string UpdateProject(int projectId, string projectTitle, string projectDescription, string projectImage,
             string gitHubLink, string liveDemoLink, string techStack, string projectType,
             string startDate, string endDate, bool isCompleted, bool isFeatured, int displayOrder, bool isActive)
@@ -608,7 +608,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string DeleteProject(int projectId)
         {
             if (!IsAuthenticated()) return GetAuthError();
@@ -654,7 +654,7 @@ namespace PortfolioWebsite
 
         #region CRUD Operations - Certifications
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string GetAllCertifications()
         {
             if (!IsAuthenticated()) return GetAuthError();
@@ -715,7 +715,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string AddCertification(string certTitle, string certDescription, string certImage,
             string issuingOrganization, string issueDate, string expiryDate, string certificateLink,
             string certType, string credentialId, bool isFeatured, int displayOrder)
@@ -772,7 +772,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string UpdateCertification(int certId, string certTitle, string certDescription,
             string certImage, string issuingOrganization, string issueDate, string expiryDate,
             string certificateLink, string certType, string credentialId, bool isFeatured, int displayOrder, bool isActive)
@@ -840,7 +840,7 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string DeleteCertification(int certId)
         {
             if (!IsAuthenticated()) return GetAuthError();
@@ -886,7 +886,7 @@ namespace PortfolioWebsite
 
         #region Dashboard Data
 
-        [WebMethod]
+    [WebMethod(EnableSession = true)]
         public static string GetDashboardStats()
         {
             if (!IsAuthenticated()) return GetAuthError();

@@ -71,6 +71,7 @@
   <ItemGroup>
     <Content Include="admin.js" />
     <Content Include="first1.js" />
+  <Content Include="scripts\sync.js" />
     <Content Include="img\2107064.jpg" />
     <Content Include="img\2107064_hasan.jpg" />
     <Content Include="img\artificial-intelligence.png" />
@@ -118,9 +119,8 @@
     <Content Include="style1.css" />
     <Content Include="admin.css" />
     <Content Include="Web.config" />
-    <Content Include="index.aspx" />
-    <Content Include="admin.aspx" />
-    <Content Include="test.aspx" />
+  <Content Include="index.aspx" />
+  <Content Include="admin.aspx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -138,13 +138,7 @@
     <Compile Include="admin.aspx.designer.cs">
       <DependentUpon>admin.aspx</DependentUpon>
     </Compile>
-    <Compile Include="test.aspx.cs">
-      <DependentUpon>test.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="test.aspx.designer.cs">
-      <DependentUpon>test.aspx</DependentUpon>
-    </Compile>
+    
   </ItemGroup>
   <ItemGroup>
     <Content Include="img\numerical.avif" />

@@ -7,11 +7,29 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Personal_portfolio
+namespace PortfolioWebsite
 {
 
 
-    public partial class WebForm1
+    public partial class index
     {
+
+        /// <summary>
+        /// rptProjects control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptProjects;
+
+        /// <summary>
+        /// rptCertifications control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptCertifications;
     }
 }

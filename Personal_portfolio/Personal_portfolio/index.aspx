@@ -20,7 +20,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- Stylesheets -->
+  <!-- Stylesheets -->
     <link rel="stylesheet" href="style1.css" />
     <link rel="stylesheet" href="admin.css" />
     
@@ -29,6 +29,12 @@
     <meta name="theme-color" content="#0077b6">
     
     <title>Jahid Hasan - Portfolio | Full Stack Developer & AI Enthusiast</title>
+    <script src="scripts/sync.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.setupIndexLiveRefresh) window.setupIndexLiveRefresh();
+        });
+    </script>
   </head>
   <body>
     <header>
@@ -380,209 +386,46 @@
     </section>
 
     <section id="myworks" class="fade_in">
-      <h2>My Works</h2>
+  <h2>My Works</h2>
 
-      <!-- GitHub Section -->
-      <div class="works-category">
-        <div class="project-grid">
+  <div class="works-category">
+    <div class="project-grid">
+      <asp:Repeater ID="rptProjects" runat="server">
+        <ItemTemplate>
           <div class="project-card">
-            <img
-              src="img/numerical_lab1.jpeg"
-              alt="Numerical Method Assignment"
-            />
+            <img src='<%# Eval("ProjectImage") %>' alt='<%# Eval("ProjectTitle") %>' />
             <div class="project-content">
-              <h4>Numerical Method Assignment</h4>
-              <p>
-                Solutions of different numerical methods assignments including
-                linear equations, ODE, and integration.
-              </p>
-              <a
-                href="https://github.com/Jahid-kuet/NemericalMethodLaboratoryAssignment_35"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
+              <h4><%# Eval("ProjectTitle") %></h4>
+              <p><%# Eval("ProjectDescription") %></p>
+              <a href='<%# Eval("GitHubLink") %>' target="_blank" class="btn">View on GitHub</a>
             </div>
           </div>
+        </ItemTemplate>
+      </asp:Repeater>
+    </div>
+  </div>
+</section>
 
-          <div class="project-card">
-            <img src="img/numerical.jpg" alt="Numerical Method Lab" />
-            <div class="project-content">
-              <h4>Numerical Method Lab</h4>
-              <p>
-                Self-implemented algorithms for numerical methods with
-                step-by-step solutions and examples.
-              </p>
-              <a
-                href="https://github.com/Jahid-kuet/Numerical_method_Laboratory_self"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
-            </div>
-          </div>
-
-          <div class="project-card">
-            <img src="img/human_activity.png" alt="Human Activity Detection" />
-            <div class="project-content">
-              <h4>Human Activity Detection</h4>
-              <p>
-                Deep learning model that recognizes and classifies human
-                activities using sensor and video data.
-              </p>
-              <a
-                href="https://github.com/Kuet-BD-Org/human_activity"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
-            </div>
-          </div>
-
-          <div class="project-card">
-            <img src="img/face_detection.png" alt="Face Detection" />
-            <div class="project-content">
-              <h4>Face Detection</h4>
-              <p>
-                Computer vision project using OpenCV to detect human faces in
-                images and real-time video streams.
-              </p>
-              <a
-                href="https://github.com/Kuet-BD-Org/Face_Detection"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
-            </div>
-          </div>
-
-          <div class="project-card">
-            <img src="img/ecommerce_api.jpg" alt="eCommerce API" />
-            <div class="project-content">
-              <h4>eCommerce Web API</h4>
-              <p>
-                A RESTful API built with Java for managing products, users, and
-                orders in an eCommerce system.
-              </p>
-              <a
-                href="https://github.com/Jahid-kuet/ecommserse-web-api"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
-            </div>
-          </div>
-
-          <div class="project-card">
-            <img src="img/placement.jpg" alt="Placement Prediction" />
-            <div class="project-content">
-              <h4>Placement Prediction</h4>
-              <p>
-                Machine learning project predicting student placement outcomes
-                based on academic performance.
-              </p>
-              <a
-                href="https://github.com/Jahid-kuet/Placement_Prediction"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
-            </div>
-          </div>
-
-          <div class="project-card">
-            <img src="img/face_recognition.jpeg" alt="Face Recognition" />
-            <div class="project-content">
-              <h4>Face Recognition</h4>
-              <p>
-                Face recognition system combining YOLO and FaceNet for accurate
-                identity verification.
-              </p>
-              <a
-                href="https://github.com/Kuet-BD-Org/face-recognition"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
-            </div>
-          </div>
-
-          <div class="project-card">
-            <img src="img/deepface.png" alt="YOLO with DeepFace" />
-            <div class="project-content">
-              <h4>YOLO with DeepFace</h4>
-              <p>
-                YOLO integrated with DeepFace for real-time face recognition and
-                detection applications.
-              </p>
-              <a
-                href="https://github.com/Kuet-BD-Org/yolo-deepface"
-                target="_blank"
-                class="btn"
-                >View on GitHub</a
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
     <!-- ===== CERTIFICATIONS & ACHIEVEMENTS ===== -->
     <section id="certifications">
-      <h2 class="section-title">Certifications & Achievements</h2>
-      <div class="certifications-container">
-        <!-- Dean's Award 1st Year -->
+  <h2 class="section-title">Certifications & Achievements</h2>
+  <div class="certifications-container">
+    <asp:Repeater ID="rptCertifications" runat="server">
+      <ItemTemplate>
         <div class="cert-card fade-in">
-          <img src="img/deans1.jpg" alt="Dean's Award 1st Year" />
+          <img src='<%# Eval("CertImage") %>' alt='<%# Eval("CertTitle") %>' />
           <div class="cert-content">
-            <h3>Dean's Award – 1st Year</h3>
-            <p>
-              Recognized for exceptional academic performance with CGPA above
-              3.75.
-            </p>
-            <span class="date">2023</span>
+            <h3><%# Eval("CertTitle") %></h3>
+            <p><%# Eval("CertDescription") %></p>
+            <span class="date"><%# Convert.ToDateTime(Eval("IssueDate")).ToString("yyyy") %></span>
           </div>
         </div>
+      </ItemTemplate>
+    </asp:Repeater>
+  </div>
+</section>
 
-        <!-- Dean's Award 2nd Year -->
-        <div class="cert-card fade-in">
-          <img src="img/certi1.jpg" alt="Dean's Award 2nd Year" />
-          <div class="cert-content">
-            <h3>Dean's Award – 2nd Year</h3>
-            <p>
-              Achieved the Dean's Award again for CGPA above 3.75 across the
-              year.
-            </p>
-            <span class="date">2024</span>
-          </div>
-        </div>
 
-        <!-- Competitive Hackathon -->
-        <div class="cert-card fade-in">
-          <img src="img/certi3.jpg" alt="Hackathon Winner" />
-          <div class="cert-content">
-            <h3>Hackathon Winner</h3>
-            <p>
-              1st place at KUET Inter-University Hackathon with an AI-powered
-              project.
-            </p>
-            <span class="date">2024</span>
-          </div>
-        </div>
-
-        <!-- Machine Learning Specialization -->
-        <div class="cert-card fade-in">
-          <img src="img/deans1.jpg" alt="Machine Learning Specialization" />
-          <div class="cert-content">
-            <h3>Machine Learning Specialization</h3>
-            <p>
-              Completed Coursera's ML Specialization by Andrew Ng, gaining
-              hands-on ML experience.
-            </p>
-            <span class="date">2023</span>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- ==== IMAGE MODAL ==== -->
     <div id="imgModal" class="modal">

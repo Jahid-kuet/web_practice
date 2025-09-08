@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -92,29 +92,134 @@ namespace PortfolioWebsite
             }
         }
 
+        //private void LoadProjects()
+        //{
+        //    string query = @"
+        //        SELECT 
+        //            ProjectID,
+        //            ProjectTitle,
+        //            ProjectDescription,
+        //            ProjectImage,
+        //            GitHubLink,
+        //            LiveDemoLink,
+        //            TechStack,
+        //            ProjectType,
+        //            StartDate,
+        //            EndDate,
+        //            IsCompleted,
+        //            IsFeatured,
+        //            DisplayOrder,
+        //            IsActive,
+        //            CreatedDate,
+        //            UpdatedDate
+        //        FROM Projects 
+        //        WHERE IsActive = 1 
+        //        ORDER BY IsFeatured DESC, DisplayOrder, CreatedDate DESC";
+
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    {
+        //        using (SqlCommand cmd = new SqlCommand(query, conn))
+        //        {
+        //            conn.Open();
+        //            using (SqlDataReader reader = cmd.ExecuteReader())
+        //            {
+        //                var projects = new List<object>();
+
+        //                while (reader.Read())
+        //                {
+        //                    projects.Add(new
+        //                    {
+        //                        ProjectID = reader["ProjectID"],
+        //                        ProjectTitle = reader["ProjectTitle"].ToString(),
+        //                        ProjectDescription = reader["ProjectDescription"].ToString(),
+        //                        ProjectImage = reader["ProjectImage"].ToString(),
+        //                        GitHubLink = reader["GitHubLink"].ToString(),
+        //                        LiveDemoLink = reader["LiveDemoLink"].ToString(),
+        //                        TechStack = reader["TechStack"].ToString(),
+        //                        ProjectType = reader["ProjectType"].ToString(),
+        //                        StartDate = reader["StartDate"],
+        //                        EndDate = reader["EndDate"],
+        //                        IsCompleted = reader["IsCompleted"],
+        //                        IsFeatured = reader["IsFeatured"],
+        //                        DisplayOrder = reader["DisplayOrder"],
+        //                        CreatedDate = reader["CreatedDate"],
+        //                        UpdatedDate = reader["UpdatedDate"]
+        //                    });
+        //                }
+
+        //                // Store in ViewState for JavaScript access
+        //                ViewState["ProjectsData"] = new JavaScriptSerializer().Serialize(projects);
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private void LoadCertifications()
+        //{
+        //    string query = @"
+        //        SELECT 
+        //            CertID,
+        //            CertTitle,
+        //            CertDescription,
+        //            CertImage,
+        //            IssuingOrganization,
+        //            IssueDate,
+        //            ExpiryDate,
+        //            CertificateLink,
+        //            CertType,
+        //            CredentialID,
+        //            IsFeatured,
+        //            DisplayOrder,
+        //            IsActive,
+        //            CreatedDate,
+        //            UpdatedDate
+        //        FROM CertificationsAchievements 
+        //        WHERE IsActive = 1 
+        //        ORDER BY IsFeatured DESC, DisplayOrder, IssueDate DESC";
+
+        //    using (SqlConnection conn = new SqlConnection(connectionString))
+        //    {
+        //        using (SqlCommand cmd = new SqlCommand(query, conn))
+        //        {
+        //            conn.Open();
+        //            using (SqlDataReader reader = cmd.ExecuteReader())
+        //            {
+        //                var certifications = new List<object>();
+
+        //                while (reader.Read())
+        //                {
+        //                    certifications.Add(new
+        //                    {
+        //                        CertID = reader["CertID"],
+        //                        CertTitle = reader["CertTitle"].ToString(),
+        //                        CertDescription = reader["CertDescription"].ToString(),
+        //                        CertImage = reader["CertImage"].ToString(),
+        //                        IssuingOrganization = reader["IssuingOrganization"].ToString(),
+        //                        IssueDate = reader["IssueDate"],
+        //                        ExpiryDate = reader["ExpiryDate"],
+        //                        CertificateLink = reader["CertificateLink"].ToString(),
+        //                        CertType = reader["CertType"].ToString(),
+        //                        CredentialID = reader["CredentialID"].ToString(),
+        //                        IsFeatured = reader["IsFeatured"],
+        //                        DisplayOrder = reader["DisplayOrder"],
+        //                        CreatedDate = reader["CreatedDate"],
+        //                        UpdatedDate = reader["UpdatedDate"]
+        //                    });
+        //                }
+
+        //                // Store in ViewState for JavaScript access
+        //                ViewState["CertificationsData"] = new JavaScriptSerializer().Serialize(certifications);
+        //            }
+        //        }
+        //    }
+        //}
         private void LoadProjects()
         {
             string query = @"
-                SELECT 
-                    ProjectID,
-                    ProjectTitle,
-                    ProjectDescription,
-                    ProjectImage,
-                    GitHubLink,
-                    LiveDemoLink,
-                    TechStack,
-                    ProjectType,
-                    StartDate,
-                    EndDate,
-                    IsCompleted,
-                    IsFeatured,
-                    DisplayOrder,
-                    IsActive,
-                    CreatedDate,
-                    UpdatedDate
-                FROM Projects 
-                WHERE IsActive = 1 
-                ORDER BY IsFeatured DESC, DisplayOrder, CreatedDate DESC";
+        SELECT ProjectTitle, ProjectDescription, ProjectImage, GitHubLink
+        FROM Projects
+        WHERE IsActive = 1
+        ORDER BY IsFeatured DESC, DisplayOrder, CreatedDate DESC";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -124,58 +229,47 @@ namespace PortfolioWebsite
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         var projects = new List<object>();
-                        
+
                         while (reader.Read())
                         {
                             projects.Add(new
                             {
-                                ProjectID = reader["ProjectID"],
                                 ProjectTitle = reader["ProjectTitle"].ToString(),
                                 ProjectDescription = reader["ProjectDescription"].ToString(),
                                 ProjectImage = reader["ProjectImage"].ToString(),
-                                GitHubLink = reader["GitHubLink"].ToString(),
-                                LiveDemoLink = reader["LiveDemoLink"].ToString(),
-                                TechStack = reader["TechStack"].ToString(),
-                                ProjectType = reader["ProjectType"].ToString(),
-                                StartDate = reader["StartDate"],
-                                EndDate = reader["EndDate"],
-                                IsCompleted = reader["IsCompleted"],
-                                IsFeatured = reader["IsFeatured"],
-                                DisplayOrder = reader["DisplayOrder"],
-                                CreatedDate = reader["CreatedDate"],
-                                UpdatedDate = reader["UpdatedDate"]
+                                GitHubLink = reader["GitHubLink"].ToString()
                             });
                         }
 
-                        // Store in ViewState for JavaScript access
-                        ViewState["ProjectsData"] = new JavaScriptSerializer().Serialize(projects);
+                        // ✅ Bind to repeater
+                        rptProjects.DataSource = projects;
+                        rptProjects.DataBind();
                     }
                 }
             }
+
+            // ✅ Console log for debugging
+            ClientScript.RegisterStartupScript(
+                this.GetType(),
+                "logProjects",
+                "console.log('Projects loaded successfully, count: " + rptProjects.Items.Count + "');",
+                true
+            );
         }
+
 
         private void LoadCertifications()
         {
             string query = @"
-                SELECT 
-                    CertID,
-                    CertTitle,
-                    CertDescription,
-                    CertImage,
-                    IssuingOrganization,
-                    IssueDate,
-                    ExpiryDate,
-                    CertificateLink,
-                    CertType,
-                    CredentialID,
-                    IsFeatured,
-                    DisplayOrder,
-                    IsActive,
-                    CreatedDate,
-                    UpdatedDate
-                FROM CertificationsAchievements 
-                WHERE IsActive = 1 
-                ORDER BY IsFeatured DESC, DisplayOrder, IssueDate DESC";
+        SELECT 
+            CertID,
+            CertTitle,
+            CertDescription,
+            CertImage,
+            IssueDate
+        FROM CertificationsAchievements 
+        WHERE IsActive = 1 
+        ORDER BY IsFeatured DESC, DisplayOrder, IssueDate DESC";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -185,7 +279,7 @@ namespace PortfolioWebsite
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         var certifications = new List<object>();
-                        
+
                         while (reader.Read())
                         {
                             certifications.Add(new
@@ -194,20 +288,15 @@ namespace PortfolioWebsite
                                 CertTitle = reader["CertTitle"].ToString(),
                                 CertDescription = reader["CertDescription"].ToString(),
                                 CertImage = reader["CertImage"].ToString(),
-                                IssuingOrganization = reader["IssuingOrganization"].ToString(),
-                                IssueDate = reader["IssueDate"],
-                                ExpiryDate = reader["ExpiryDate"],
-                                CertificateLink = reader["CertificateLink"].ToString(),
-                                CertType = reader["CertType"].ToString(),
-                                CredentialID = reader["CredentialID"].ToString(),
-                                IsFeatured = reader["IsFeatured"],
-                                DisplayOrder = reader["DisplayOrder"],
-                                CreatedDate = reader["CreatedDate"],
-                                UpdatedDate = reader["UpdatedDate"]
+                                IssueDate = reader["IssueDate"]
                             });
                         }
 
-                        // Store in ViewState for JavaScript access
+                        // ✅ Bind to repeater
+                        rptCertifications.DataSource = certifications;
+                        rptCertifications.DataBind();
+
+                        // ✅ Store JSON for JS (optional)
                         ViewState["CertificationsData"] = new JavaScriptSerializer().Serialize(certifications);
                     }
                 }

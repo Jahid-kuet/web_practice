@@ -221,7 +221,14 @@ function initializeAdminPanel() {
     initializePasswordManagement();
 
     // Load initial data
-    loadDashboardData();
+    // Sync from server first, then render dashboard
+    if (typeof syncFromServer === 'function') {
+        syncFromServer().finally(() => {
+            loadDashboardData();
+        });
+    } else {
+        loadDashboardData();
+    }
 }
 
 // === THEME MANAGEMENT ===
@@ -276,22 +283,36 @@ function initializeLogin() {
             const savedPwd = localStorage.getItem("adminPwd");
 
             if (username === "admin" && password === savedPwd) {
-                loginMsg.innerHTML = '<i class="fas fa-check-circle"></i> Login successful!';
-                loginMsg.style.color = "#22c55e";
-                loginMsg.style.background = "rgba(34, 197, 94, 0.1)";
+                (async () => {
+                    // Inform server to set ASP.NET Session for WebMethods
+                    const resp = await callWebMethod('AuthenticateAdmin', { username, password });
+                    if (!resp || resp.success !== true) {
+                        loginMsg.innerHTML = '<i class="fas fa-times-circle"></i> Server auth failed.';
+                        loginMsg.style.color = "#ef4444";
+                        loginMsg.style.background = "rgba(239, 68, 68, 0.1)";
+                        return;
+                    }
 
-                // Set session
-                sessionManager.setSession({
-                    loggedIn: true,
-                    username: username,
-                    loginTime: Date.now()
-                });
+                    loginMsg.innerHTML = '<i class="fas fa-check-circle"></i> Login successful!';
+                    loginMsg.style.color = "#22c55e";
+                    loginMsg.style.background = "rgba(34, 197, 94, 0.1)";
 
-                setTimeout(() => {
-                    loginModal.classList.remove("active");
-                    showNotification('Welcome back, Admin!', 'success');
-                    loadDashboardData();
-                }, 1000);
+                    // Set client session
+                    sessionManager.setSession({
+                        loggedIn: true,
+                        username: username,
+                        loginTime: Date.now()
+                    });
+
+                    // Prime cache from server
+                    try { await syncFromServer(); } catch(e) {}
+
+                    setTimeout(() => {
+                        loginModal.classList.remove("active");
+                        showNotification('Welcome back, Admin!', 'success');
+                        loadDashboardData();
+                    }, 600);
+                })();
             } else {
                 loginMsg.innerHTML = '<i class="fas fa-times-circle"></i> Invalid username or password.';
                 loginMsg.style.color = "#ef4444";
@@ -625,6 +646,233 @@ class DataStore {
 }
 
 const dataStore = new DataStore();
+
+// ===== Server Integration & Live Refresh =====
+async function callWebMethod(method, payload) {
+    try {
+        const res = await fetch(`admin.aspx/${method}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            body: JSON.stringify(payload || {})
+        });
+        let text = await res.text();
+        // WebForms PageMethods often return { d: "...json..." } or { d: { ... } }
+        try {
+            const parsed = JSON.parse(text);
+            if (parsed && typeof parsed === 'object' && parsed.hasOwnProperty('d')) {
+                if (typeof parsed.d === 'string') {
+                    try { return JSON.parse(parsed.d); } catch { return { success: false, message: parsed.d }; }
+                }
+                return parsed.d;
+            }
+            return parsed;
+        } catch (e) {
+            // Some WebMethods already serialize to JSON string
+            try { return JSON.parse(text); } catch { return { success: false, message: text }; }
+        }
+    } catch (err) {
+        return { success: false, message: err.message || 'Request failed' };
+    }
+}
+
+function broadcastChange(section) {
+    try { if (window.notifyDataChanged) window.notifyDataChanged(section || 'all'); } catch (e) {}
+}
+
+async function syncFromServer() {
+    // Skills
+    try {
+        const sk = await callWebMethod('GetAllSkills', {});
+        if (sk && sk.success && sk.data) {
+            const skills = sk.data.map(s => ({
+                id: s.SkillID,
+                name: s.SkillName,
+                category: s.CategoryName,
+                proficiency: s.SkillLevel,
+                imageUrl: s.IconImage,
+                icon: s.IconImage,
+                description: s.SkillDescription || '',
+                displayOrder: s.DisplayOrder || 0,
+                isActive: s.IsActive === true || s.IsActive === 1
+            }));
+            localStorage.setItem('admin_skills', JSON.stringify(skills));
+        }
+    } catch {}
+
+    // Projects
+    try {
+        const pj = await callWebMethod('GetAllProjects', {});
+        if (pj && pj.success && pj.data) {
+            const projects = pj.data.map(p => ({
+                id: p.ProjectID,
+                title: p.ProjectTitle,
+                description: p.ProjectDescription || '',
+                image: p.ProjectImage || '',
+                githubUrl: p.GitHubLink || '',
+                liveUrl: p.LiveDemoLink || '',
+                technologies: p.TechStack || '',
+                category: p.ProjectType || 'Web Development',
+                status: (p.IsCompleted ? 'Completed' : 'In Progress'),
+                isFeatured: !!p.IsFeatured,
+                displayOrder: p.DisplayOrder || 0
+            }));
+            localStorage.setItem('admin_projects', JSON.stringify(projects));
+        }
+    } catch {}
+
+    // Certifications
+    try {
+        const cf = await callWebMethod('GetAllCertifications', {});
+        if (cf && cf.success && cf.data) {
+            const certs = cf.data.map(c => ({
+                id: c.CertID,
+                title: c.CertTitle,
+                description: c.CertDescription || '',
+                image: c.CertImage || '',
+                issuer: c.IssuingOrganization || '',
+                date: c.IssueDate || '',
+                expiryDate: c.ExpiryDate || '',
+                verificationUrl: c.CertificateLink || '',
+                type: c.CertType || 'Certification',
+                credentialId: c.CredentialID || '',
+                isFeatured: !!c.IsFeatured,
+                displayOrder: c.DisplayOrder || 0
+            }));
+            localStorage.setItem('admin_certifications', JSON.stringify(certs));
+        }
+    } catch {}
+}
+
+// Patch DataStore methods to persist to server and live-refresh
+(function(){
+    const origAdd = dataStore.add.bind(dataStore);
+    const origUpdate = dataStore.update.bind(dataStore);
+    const origDelete = dataStore.delete.bind(dataStore);
+
+    dataStore.add = async function(key, item){
+        let result = origAdd(key, item);
+        try {
+            if (key === 'skills') {
+                const payload = {
+                    skillName: item.name,
+                    categoryName: item.category,
+                    skillLevel: item.proficiency,
+                    iconImage: item.imageUrl || item.icon || '',
+                    skillDescription: item.description || '',
+                    displayOrder: item.displayOrder || 0
+                };
+                await callWebMethod('AddSkill', payload);
+            } else if (key === 'projects') {
+                const payload = {
+                    projectTitle: item.title,
+                    projectDescription: item.description || '',
+                    projectImage: item.image || '',
+                    gitHubLink: item.githubUrl || '',
+                    liveDemoLink: item.liveUrl || '',
+                    techStack: item.technologies || '',
+                    projectType: item.category || 'Web Development',
+                    startDate: '',
+                    endDate: '',
+                    isCompleted: (item.status || '').toLowerCase() === 'completed',
+                    isFeatured: !!item.isFeatured,
+                    displayOrder: item.displayOrder || 0
+                };
+                await callWebMethod('AddProject', payload);
+            } else if (key === 'certifications') {
+                const payload = {
+                    certTitle: item.title,
+                    certDescription: item.description || '',
+                    certImage: item.image || '',
+                    issuingOrganization: item.issuer || '',
+                    issueDate: item.date || '',
+                    expiryDate: item.expiryDate || '',
+                    certificateLink: item.verificationUrl || '',
+                    certType: item.type || 'Certification',
+                    credentialId: item.credentialId || '',
+                    isFeatured: !!item.isFeatured,
+                    displayOrder: item.displayOrder || 0
+                };
+                await callWebMethod('AddCertification', payload);
+            }
+        } catch(e) {}
+        await syncFromServer();
+        broadcastChange(key);
+        return result;
+    };
+
+    dataStore.update = async function(key, id, updated){
+        let result = origUpdate(key, id, updated);
+        try {
+            if (key === 'skills') {
+                const payload = {
+                    skillId: id,
+                    skillName: updated.name,
+                    categoryName: updated.category,
+                    skillLevel: updated.proficiency,
+                    iconImage: updated.imageUrl || updated.icon || '',
+                    skillDescription: updated.description || '',
+                    displayOrder: updated.displayOrder || 0,
+                    isActive: updated.isActive !== false
+                };
+                await callWebMethod('UpdateSkill', payload);
+            } else if (key === 'projects') {
+                const payload = {
+                    projectId: id,
+                    projectTitle: updated.title,
+                    projectDescription: updated.description || '',
+                    projectImage: updated.image || '',
+                    gitHubLink: updated.githubUrl || '',
+                    liveDemoLink: updated.liveUrl || '',
+                    techStack: updated.technologies || '',
+                    projectType: updated.category || 'Web Development',
+                    startDate: '',
+                    endDate: '',
+                    isCompleted: (updated.status || '').toLowerCase() === 'completed',
+                    isFeatured: !!updated.isFeatured,
+                    displayOrder: updated.displayOrder || 0,
+                    isActive: updated.isActive !== false
+                };
+                await callWebMethod('UpdateProject', payload);
+            } else if (key === 'certifications') {
+                const payload = {
+                    certId: id,
+                    certTitle: updated.title,
+                    certDescription: updated.description || '',
+                    certImage: updated.image || '',
+                    issuingOrganization: updated.issuer || '',
+                    issueDate: updated.date || '',
+                    expiryDate: updated.expiryDate || '',
+                    certificateLink: updated.verificationUrl || '',
+                    certType: updated.type || 'Certification',
+                    credentialId: updated.credentialId || '',
+                    isFeatured: !!updated.isFeatured,
+                    displayOrder: updated.displayOrder || 0,
+                    isActive: updated.isActive !== false
+                };
+                await callWebMethod('UpdateCertification', payload);
+            }
+        } catch(e) {}
+        await syncFromServer();
+        broadcastChange(key);
+        return result;
+    };
+
+    dataStore.delete = async function(key, id){
+        let ok = origDelete(key, id);
+        try {
+            if (key === 'skills') {
+                await callWebMethod('DeleteSkill', { skillId: id });
+            } else if (key === 'projects') {
+                await callWebMethod('DeleteProject', { projectId: id });
+            } else if (key === 'certifications') {
+                await callWebMethod('DeleteCertification', { certId: id });
+            }
+        } catch(e) {}
+        await syncFromServer();
+        broadcastChange(key);
+        return ok;
+    };
+})();
 
 // === DASHBOARD ===
 function loadDashboardData() {
