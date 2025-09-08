@@ -7,11 +7,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Personal_portfolio
+namespace PortfolioWebsite
 {
-
-
-    public partial class WebForm2
+    public partial class admin
     {
     }
 }

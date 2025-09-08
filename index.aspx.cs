@@ -85,6 +85,10 @@ namespace PortfolioWebsite
                             });
                         }
 
+                        // Bind to repeater control
+                        SkillsRepeater.DataSource = skills;
+                        SkillsRepeater.DataBind();
+
                         // Store in ViewState for JavaScript access
                         ViewState["SkillsData"] = new JavaScriptSerializer().Serialize(skills);
                     }
@@ -147,6 +151,10 @@ namespace PortfolioWebsite
                             });
                         }
 
+                        // Bind to repeater control
+                        ProjectsRepeater.DataSource = projects;
+                        ProjectsRepeater.DataBind();
+
                         // Store in ViewState for JavaScript access
                         ViewState["ProjectsData"] = new JavaScriptSerializer().Serialize(projects);
                     }
@@ -206,6 +214,10 @@ namespace PortfolioWebsite
                                 UpdatedDate = reader["UpdatedDate"]
                             });
                         }
+
+                        // Bind to repeater control
+                        CertificationsRepeater.DataSource = certifications;
+                        CertificationsRepeater.DataBind();
 
                         // Store in ViewState for JavaScript access
                         ViewState["CertificationsData"] = new JavaScriptSerializer().Serialize(certifications);
@@ -513,7 +525,6 @@ namespace PortfolioWebsite
             catch (Exception ex)
             {
                 // Log error (implement your logging mechanism)
-                System.Diagnostics.Debug.WriteLine($"Contact form error: {ex.Message}");
                 return new JavaScriptSerializer().Serialize(new 
                 { 
                     success = false, 

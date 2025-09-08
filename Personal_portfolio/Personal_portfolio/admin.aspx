@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="admin.aspx.cs" Inherits="Personal_portfolio.WebForm2" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="admin.aspx.cs" Inherits="PortfolioWebsite.admin" %>
 
 <!DOCTYPE html>
 <html lang="en">

@@ -698,7 +698,7 @@ class NavigationManager {
                 this.adminMenuBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
                 setTimeout(() => {
-                    window.location.href = "admin.html";
+                    window.location.href = "admin.aspx";
                 }, 500);
             });
         }

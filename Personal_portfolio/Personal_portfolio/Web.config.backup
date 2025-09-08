@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <configSections>
+    <!-- For more information on Entity Framework configuration, visit http://go.microsoft.com/fwlink/?LinkID=237468 -->
+    <section name="entityFramework" type="System.Data.Entity.Internal.ConfigFile.EntityFrameworkSection, EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" requirePermission="false" />
+  </configSections>
+  
+  <!-- Connection Strings -->
+  <connectionStrings>
+    <add name="DefaultConnection" 
+         connectionString="Data Source=LAPTOP-3UEU9KV7\SQLEXPRESS;Initial Catalog=PortfolioWebsite;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False" 
+         providerName="System.Data.SqlClient" />
+    
+    <add name="PortfolioConnectionString" 
+         connectionString="Data Source=LAPTOP-3UEU9KV7\SQLEXPRESS;Initial Catalog=PortfolioWebsite;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False" 
+         providerName="System.Data.SqlClient" />
+  </connectionStrings>
+  
+  <!-- App Settings -->
+  <appSettings>
+    <add key="webpages:Version" value="3.0.0.0" />
+    <add key="webpages:Enabled" value="false" />
+    <add key="ClientValidationEnabled" value="true" />
+    <add key="UnobtrusiveJavaScriptEnabled" value="true" />
+    <add key="AdminUsername" value="admin" />
+    <add key="AdminPassword" value="admin123" />
+    <add key="SecretKey" value="portfolio2024" />
+    <add key="EnableDebugMode" value="true" />
+    <add key="MaxFileUploadSize" value="5242880" /> <!-- 5MB -->
+    <add key="AllowedImageTypes" value=".jpg,.jpeg,.png,.gif,.webp" />
+  </appSettings>
+  
+  <system.web>
+    <!-- Compilation Settings -->
+    <compilation debug="true" targetFramework="4.7.2" />
+    
+    <!-- HTTP Runtime Settings -->
+    <httpRuntime targetFramework="4.7.2" maxRequestLength="51200" executionTimeout="3600" />
+    
+    <!-- Session State -->
+    <sessionState mode="InProc" timeout="30" />
+    
+    <!-- Authentication -->
+    <authentication mode="Forms">
+      <forms loginUrl="~/admin.aspx" timeout="30" />
+    </authentication>
+    
+    <!-- Authorization -->
+    <authorization>
+      <allow users="*" />
+    </authorization>
+    
+    <!-- Custom Errors -->
+    <customErrors mode="Off" />
+    
+    <!-- Pages Settings -->
+    <pages controlRenderingCompatibilityVersion="4.0" />
+    
+    <!-- Globalization -->
+    <globalization culture="en-US" uiCulture="en-US" />
+    
+    <!-- Trust Level -->
+    <trust level="Full" />
+    
+    <!-- HTTP Modules -->
+    <httpModules>
+      <add name="ErrorHandlerModule" type="System.Web.Mobile.ErrorHandlerModule" />
+    </httpModules>
+    
+    <!-- HTTP Handlers -->
+    <httpHandlers>
+      <add verb="GET,HEAD" path="*.css" type="System.Web.StaticFileHandler" />
+      <add verb="GET,HEAD" path="*.js" type="System.Web.StaticFileHandler" />
+      <add verb="GET,HEAD" path="*.png,*.jpg,*.jpeg,*.gif" type="System.Web.StaticFileHandler" />
+    </httpHandlers>
+  </system.web>
+  
+  <!-- System.webServer for IIS 7+ -->
+  <system.webServer>
+    <!-- Default Documents -->
+    <defaultDocument>
+      <files>
+        <clear />
+        <add value="index.aspx" />
+        <add value="default.aspx" />
+        <add value="index.html" />
+      </files>
+    </defaultDocument>
+    
+    <!-- HTTP Errors -->
+    <httpErrors errorMode="Detailed" />
+    
+    <!-- Static Content -->
+    <staticContent>
+      <!-- Remove existing MIME types first, then add them -->
+      <remove fileExtension=".woff" />
+      <remove fileExtension=".woff2" />
+      <remove fileExtension=".json" />
+      
+      <!-- Add MIME types -->
+      <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
+      <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+      <mimeMap fileExtension=".json" mimeType="application/json" />
+    </staticContent>
+    
+    <!-- URL Rewrite (if needed) -->
+    <rewrite>
+      <rules>
+        <rule name="Redirect to HTTPS" stopProcessing="true">
+          <match url=".*" />
+          <conditions>
+            <add input="{HTTPS}" pattern="off" ignoreCase="true" />
+            <add input="{HTTP_HOST}" pattern="localhost" negate="true" />
+          </conditions>
+          <action type="Redirect" url="https://{HTTP_HOST}/{R:0}" redirectType="Permanent" />
+        </rule>
+      </rules>
+    </rewrite>
+    
+    <!-- Security Headers -->
+    <httpProtocol>
+      <customHeaders>
+        <add name="X-Content-Type-Options" value="nosniff" />
+        <add name="X-Frame-Options" value="SAMEORIGIN" />
+        <add name="X-XSS-Protection" value="1; mode=block" />
+        <add name="Strict-Transport-Security" value="max-age=31536000; includeSubDomains" />
+      </customHeaders>
+    </httpProtocol>
+    
+    <!-- Handlers -->
+    <handlers>
+      <add name="StaticFileHandler" path="*.css,*.js,*.png,*.jpg,*.jpeg,*.gif,*.ico,*.svg" verb="GET,HEAD" type="System.Web.StaticFileHandler" />
+    </handlers>
+    
+    <!-- Modules -->
+    <modules>
+      <add name="ErrorHandlerModule" type="System.Web.Mobile.ErrorHandlerModule" preCondition="managedHandler" />
+    </modules>
+  </system.webServer>
+  
+  <!-- Runtime -->
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="System.Web.Mvc" publicKeyToken="31BF3856AD364E35" />
+        <bindingRedirect oldVersion="0.0.0.0-5.2.7.0" newVersion="5.2.7.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="Newtonsoft.Json" publicKeyToken="30ad4fe6b2a6aeed" />
+        <bindingRedirect oldVersion="0.0.0.0-12.0.0.0" newVersion="12.0.0.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+  
+  <!-- Entity Framework -->
+  <entityFramework>
+    <defaultConnectionFactory type="System.Data.Entity.Infrastructure.LocalDbConnectionFactory, EntityFramework">
+      <parameters>
+        <parameter value="mssqllocaldb" />
+      </parameters>
+    </defaultConnectionFactory>
+    <providers>
+      <provider invariantName="System.Data.SqlClient" type="System.Data.Entity.SqlServer.SqlProviderServices, EntityFramework.SqlServer" />
+    </providers>
+  </entityFramework>
+</configuration>
