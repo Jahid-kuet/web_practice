@@ -45,19 +45,9 @@ namespace PortfolioWebsite
         private void LoadTechnicalSkills()
         {
             string query = @"
-                SELECT 
-                    SkillID, 
-                    CategoryName, 
-                    SkillName, 
-                    SkillLevel, 
-                    SkillDescription, 
-                    IconImage, 
-                    DisplayOrder,
-                    IsActive,
-                    CreatedDate,
-                    UpdatedDate
-                FROM TechnicalSkills 
-                WHERE IsActive = 1 
+                SELECT CategoryName, SkillName, SkillLevel
+                FROM TechnicalSkills
+                WHERE IsActive = 1
                 ORDER BY DisplayOrder, CategoryName, SkillName";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -68,25 +58,17 @@ namespace PortfolioWebsite
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         var skills = new List<object>();
-                        
                         while (reader.Read())
                         {
                             skills.Add(new
                             {
-                                SkillID = reader["SkillID"],
-                                SkillName = reader["SkillName"].ToString(),
                                 CategoryName = reader["CategoryName"].ToString(),
-                                SkillLevel = reader["SkillLevel"].ToString(),
-                                SkillDescription = reader["SkillDescription"].ToString(),
-                                IconImage = reader["IconImage"].ToString(),
-                                DisplayOrder = reader["DisplayOrder"],
-                                CreatedDate = reader["CreatedDate"],
-                                UpdatedDate = reader["UpdatedDate"]
+                                SkillName = reader["SkillName"].ToString(),
+                                SkillLevel = reader["SkillLevel"].ToString()
                             });
                         }
-
-                        // Store in ViewState for JavaScript access
-                        ViewState["SkillsData"] = new JavaScriptSerializer().Serialize(skills);
+                        rptSkills.DataSource = skills;
+                        rptSkills.DataBind();
                     }
                 }
             }
@@ -216,10 +198,10 @@ namespace PortfolioWebsite
         private void LoadProjects()
         {
             string query = @"
-        SELECT ProjectTitle, ProjectDescription, ProjectImage, GitHubLink
-        FROM Projects
-        WHERE IsActive = 1
-        ORDER BY IsFeatured DESC, DisplayOrder, CreatedDate DESC";
+                SELECT ProjectTitle, ProjectDescription, ProjectImage, GitHubLink
+                FROM Projects
+                WHERE IsActive = 1
+                ORDER BY IsFeatured DESC, DisplayOrder, CreatedDate DESC";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -229,7 +211,6 @@ namespace PortfolioWebsite
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         var projects = new List<object>();
-
                         while (reader.Read())
                         {
                             projects.Add(new
@@ -240,67 +221,17 @@ namespace PortfolioWebsite
                                 GitHubLink = reader["GitHubLink"].ToString()
                             });
                         }
-
-                        // ✅ Bind to repeater
                         rptProjects.DataSource = projects;
                         rptProjects.DataBind();
                     }
                 }
             }
-
-            // ✅ Console log for debugging
-            ClientScript.RegisterStartupScript(
-                this.GetType(),
-                "logProjects",
-                "console.log('Projects loaded successfully, count: " + rptProjects.Items.Count + "');",
-                true
-            );
         }
 
 
         private void LoadCertifications()
         {
-            string query = @"
-        SELECT 
-            CertID,
-            CertTitle,
-            CertDescription,
-            CertImage,
-            IssueDate
-        FROM CertificationsAchievements 
-        WHERE IsActive = 1 
-        ORDER BY IsFeatured DESC, DisplayOrder, IssueDate DESC";
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        var certifications = new List<object>();
-
-                        while (reader.Read())
-                        {
-                            certifications.Add(new
-                            {
-                                CertID = reader["CertID"],
-                                CertTitle = reader["CertTitle"].ToString(),
-                                CertDescription = reader["CertDescription"].ToString(),
-                                CertImage = reader["CertImage"].ToString(),
-                                IssueDate = reader["IssueDate"]
-                            });
-                        }
-
-                        // ✅ Bind to repeater
-                        rptCertifications.DataSource = certifications;
-                        rptCertifications.DataBind();
-
-                        // ✅ Store JSON for JS (optional)
-                        ViewState["CertificationsData"] = new JavaScriptSerializer().Serialize(certifications);
-                    }
-                }
-            }
+            // Static or previous logic restored. No repeater binding.
         }
 
         private void LoadPersonalInfo()
