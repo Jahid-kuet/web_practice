@@ -7,6 +7,20 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeAdminPanel();
 });
 
+// Normalize image paths: allow full URL, data URI, img/relative, or bare filename
+function normalizeImagePath(path) {
+    if (!path) return '';
+    let p = path.trim().replace(/\\/g, '/');
+    // Keep absolute URLs or protocol-relative or data URIs as-is
+    if (/^(?:https?:)?\/\//i.test(p) || /^data:/i.test(p)) return p;
+    // If already starts with img/ or /img/, keep as-is
+    if (/^\/?img\//i.test(p)) return p.replace(/^\//, '');
+    // If contains any slash, assume it's an app-relative path; keep as-is
+    if (p.includes('/')) return p;
+    // Otherwise treat as a filename in img/
+    return `img/${p}`;
+}
+
 // === SESSION MANAGEMENT ===
 class SessionManager {
     constructor() {
@@ -87,6 +101,22 @@ class SessionManager {
 }
 
 const sessionManager = new SessionManager();
+
+// Cache last successful admin credentials in sessionStorage for auto re-auth
+const AuthState = {
+    set(creds) {
+        try { sessionStorage.setItem('admin_creds', JSON.stringify({ u: creds.username, p: creds.password })); } catch (e) {}
+    },
+    get() {
+        try {
+            const s = sessionStorage.getItem('admin_creds');
+            if (!s) return null;
+            const obj = JSON.parse(s);
+            return { username: obj.u, password: obj.p };
+        } catch (e) { return null; }
+    },
+    clear() { try { sessionStorage.removeItem('admin_creds'); } catch (e) {} }
+};
 
 // === NOTIFICATION SYSTEM ===
 function showNotification(message, type = 'info', duration = 3000) {
@@ -280,45 +310,40 @@ function initializeLogin() {
             e.preventDefault();
             const username = loginForm.username.value.trim();
             const password = loginForm.password.value.trim();
-            const savedPwd = localStorage.getItem("adminPwd");
 
-            if (username === "admin" && password === savedPwd) {
-                (async () => {
-                    // Inform server to set ASP.NET Session for WebMethods
-                    const resp = await callWebMethod('AuthenticateAdmin', { username, password });
-                    if (!resp || resp.success !== true) {
-                        loginMsg.innerHTML = '<i class="fas fa-times-circle"></i> Server auth failed.';
-                        loginMsg.style.color = "#ef4444";
-                        loginMsg.style.background = "rgba(239, 68, 68, 0.1)";
-                        return;
-                    }
+            (async () => {
+                const resp = await callWebMethod('AuthenticateAdmin', { username, password });
+                if (!resp || resp.success !== true) {
+                    loginMsg.innerHTML = '<i class="fas fa-times-circle"></i> Invalid username or password.';
+                    loginMsg.style.color = "#ef4444";
+                    loginMsg.style.background = "rgba(239, 68, 68, 0.1)";
+                    showNotification('Invalid credentials', 'error');
+                    return;
+                }
 
-                    loginMsg.innerHTML = '<i class="fas fa-check-circle"></i> Login successful!';
-                    loginMsg.style.color = "#22c55e";
-                    loginMsg.style.background = "rgba(34, 197, 94, 0.1)";
+                // Cache creds for auto re-auth
+                AuthState.set({ username, password });
 
-                    // Set client session
-                    sessionManager.setSession({
-                        loggedIn: true,
-                        username: username,
-                        loginTime: Date.now()
-                    });
+                loginMsg.innerHTML = '<i class="fas fa-check-circle"></i> Login successful!';
+                loginMsg.style.color = "#22c55e";
+                loginMsg.style.background = "rgba(34, 197, 94, 0.1)";
 
-                    // Prime cache from server
-                    try { await syncFromServer(); } catch(e) {}
+                // Set client session
+                sessionManager.setSession({
+                    loggedIn: true,
+                    username: username,
+                    loginTime: Date.now()
+                });
 
-                    setTimeout(() => {
-                        loginModal.classList.remove("active");
-                        showNotification('Welcome back, Admin!', 'success');
-                        loadDashboardData();
-                    }, 600);
-                })();
-            } else {
-                loginMsg.innerHTML = '<i class="fas fa-times-circle"></i> Invalid username or password.';
-                loginMsg.style.color = "#ef4444";
-                loginMsg.style.background = "rgba(239, 68, 68, 0.1)";
-                showNotification('Invalid credentials', 'error');
-            }
+                // Prime cache from server
+                try { await syncFromServer(); } catch(e) {}
+
+                setTimeout(() => {
+                    loginModal.classList.remove("active");
+                    showNotification('Welcome back, Admin!', 'success');
+                    loadDashboardData();
+                }, 600);
+            })();
         });
     }
 
@@ -459,6 +484,8 @@ function initializeNavigation() {
     if (logoutBtn) {
         logoutBtn.addEventListener("click", (e) => {
             e.preventDefault();
+            (async () => { try { await callWebMethod('Logout', {}); } catch(e) {} })();
+            AuthState.clear();
             sessionManager.clearSession();
             showNotification('Logged out successfully', 'info');
             setTimeout(() => location.reload(), 1000);
@@ -648,14 +675,53 @@ class DataStore {
 const dataStore = new DataStore();
 
 // ===== Server Integration & Live Refresh =====
-async function callWebMethod(method, payload) {
+async function ensureServerAuth() {
+    const creds = AuthState.get();
+    if (!creds || !creds.username || !creds.password) return { success: false };
+    try {
+        const r = await fetch('admin.aspx/AuthenticateAdmin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Cache-Control': 'no-cache'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ username: creds.username, password: creds.password })
+        });
+        const txt = await r.text();
+        try {
+            const p = JSON.parse(txt);
+            const val = p && p.d ? (typeof p.d === 'string' ? JSON.parse(p.d) : p.d) : p;
+            return val && val.success === true ? { success: true } : { success: false };
+        } catch { return { success: false }; }
+    } catch { return { success: false }; }
+}
+
+async function callWebMethod(method, payload, _retried) {
     try {
         const res = await fetch(`admin.aspx/${method}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Cache-Control': 'no-cache'
+            },
+            credentials: 'same-origin',
             body: JSON.stringify(payload || {})
         });
+        const status = res.status;
         let text = await res.text();
+        // If the response looks like HTML (e.g., redirected login page), treat as auth error
+        if (!res.ok || (text && /<\s*html[\s>]/i.test(text))) {
+            if (!_retried) {
+                const auth = await ensureServerAuth();
+                if (auth && auth.success) {
+                    return await callWebMethod(method, payload, true);
+                }
+            }
+            return { success: false, requireAuth: true, message: 'Authentication required or server error.' };
+        }
         // WebForms PageMethods often return { d: "...json..." } or { d: { ... } }
         try {
             const parsed = JSON.parse(text);
@@ -750,7 +816,6 @@ async function syncFromServer() {
     const origDelete = dataStore.delete.bind(dataStore);
 
     dataStore.add = async function(key, item){
-        let result = origAdd(key, item);
         try {
             if (key === 'skills') {
                 const payload = {
@@ -761,7 +826,8 @@ async function syncFromServer() {
                     skillDescription: item.description || '',
                     displayOrder: item.displayOrder || 0
                 };
-                await callWebMethod('AddSkill', payload);
+                const r = await callWebMethod('AddSkill', payload);
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Add skill failed');
             } else if (key === 'projects') {
                 const payload = {
                     projectTitle: item.title,
@@ -777,7 +843,8 @@ async function syncFromServer() {
                     isFeatured: !!item.isFeatured,
                     displayOrder: item.displayOrder || 0
                 };
-                await callWebMethod('AddProject', payload);
+                const r = await callWebMethod('AddProject', payload);
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Add project failed');
             } else if (key === 'certifications') {
                 const payload = {
                     certTitle: item.title,
@@ -792,16 +859,19 @@ async function syncFromServer() {
                     isFeatured: !!item.isFeatured,
                     displayOrder: item.displayOrder || 0
                 };
-                await callWebMethod('AddCertification', payload);
+                const r = await callWebMethod('AddCertification', payload);
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Add certification failed');
             }
-        } catch(e) {}
+        } catch(e) {
+            showNotification(e.message || 'Add failed', 'error');
+        }
+        // Always refresh from server for authoritative data/IDs
         await syncFromServer();
         broadcastChange(key);
-        return result;
+        return true;
     };
 
     dataStore.update = async function(key, id, updated){
-        let result = origUpdate(key, id, updated);
         try {
             if (key === 'skills') {
                 const payload = {
@@ -814,7 +884,8 @@ async function syncFromServer() {
                     displayOrder: updated.displayOrder || 0,
                     isActive: updated.isActive !== false
                 };
-                await callWebMethod('UpdateSkill', payload);
+                const r = await callWebMethod('UpdateSkill', payload);
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Update skill failed');
             } else if (key === 'projects') {
                 const payload = {
                     projectId: id,
@@ -832,7 +903,8 @@ async function syncFromServer() {
                     displayOrder: updated.displayOrder || 0,
                     isActive: updated.isActive !== false
                 };
-                await callWebMethod('UpdateProject', payload);
+                const r = await callWebMethod('UpdateProject', payload);
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Update project failed');
             } else if (key === 'certifications') {
                 const payload = {
                     certId: id,
@@ -849,28 +921,37 @@ async function syncFromServer() {
                     displayOrder: updated.displayOrder || 0,
                     isActive: updated.isActive !== false
                 };
-                await callWebMethod('UpdateCertification', payload);
+                const r = await callWebMethod('UpdateCertification', payload);
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Update certification failed');
             }
-        } catch(e) {}
+        } catch(e) {
+            showNotification(e.message || 'Update failed', 'error');
+        }
         await syncFromServer();
         broadcastChange(key);
-        return result;
+        return true;
     };
 
     dataStore.delete = async function(key, id){
-        let ok = origDelete(key, id);
         try {
             if (key === 'skills') {
-                await callWebMethod('DeleteSkill', { skillId: id });
+                const r = await callWebMethod('DeleteSkill', { skillId: id });
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Delete skill failed');
             } else if (key === 'projects') {
-                await callWebMethod('DeleteProject', { projectId: id });
+                const r = await callWebMethod('DeleteProject', { projectId: id });
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Delete project failed');
             } else if (key === 'certifications') {
-                await callWebMethod('DeleteCertification', { certId: id });
+                const r = await callWebMethod('DeleteCertification', { certId: id });
+                if (!r || r.success !== true) throw new Error(r && r.message || 'Delete certification failed');
             }
-        } catch(e) {}
+            // Update local after server success to avoid UI drift
+            origDelete(key, id);
+        } catch(e) {
+            showNotification(e.message || 'Delete failed', 'error');
+        }
         await syncFromServer();
         broadcastChange(key);
-        return ok;
+        return true;
     };
 })();
 
@@ -1003,10 +1084,10 @@ function renderUsersTable() {
       <td>${user.email}</td>
       <td><span class="role-badge">${user.role}</span></td>
       <td>
-        <button class="edit-btn edit-user-btn" data-id="${user.id}">
+    <button type="button" class="edit-btn edit-user-btn" data-id="${user.id}">
           <i class="fas fa-edit"></i> Edit
         </button>
-        <button class="delete-btn delete-user-btn" data-id="${user.id}">
+    <button type="button" class="delete-btn delete-user-btn" data-id="${user.id}">
           <i class="fas fa-trash"></i> Delete
         </button>
       </td>
@@ -1141,10 +1222,10 @@ function renderSkillsTable() {
         ${skill.icon ? `<i class="${skill.icon}"></i>` : 'N/A'}
       </td>
       <td>
-        <button class="edit-btn edit-skill-btn" data-id="${skill.id}">
+    <button type="button" class="edit-btn edit-skill-btn" data-id="${skill.id}">
           <i class="fas fa-edit"></i> Edit
         </button>
-        <button class="delete-btn delete-skill-btn" data-id="${skill.id}">
+    <button type="button" class="delete-btn delete-skill-btn" data-id="${skill.id}">
           <i class="fas fa-trash"></i> Delete
         </button>
       </td>
@@ -1195,7 +1276,7 @@ function initializeProjects() {
             const category = document.getElementById("projectCategory").value.trim();
             const technologies = document.getElementById("projectTechnologies").value.trim();
             const status = document.getElementById("projectStatus").value;
-            const image = document.getElementById("projectImage").value.trim();
+            const image = normalizeImagePath(document.getElementById("projectImage").value.trim());
             const liveUrl = document.getElementById("projectLiveUrl").value.trim();
             const githubUrl = document.getElementById("projectGithubUrl").value.trim();
             const description = document.getElementById("projectDescription").value.trim();
@@ -1286,10 +1367,10 @@ function renderProjectsTable() {
       </td>
       <td><span class="project-status ${project.status.toLowerCase().replace(' ', '-')}">${project.status}</span></td>
       <td>
-        <button class="edit-btn edit-project-btn" data-id="${project.id}">
+    <button type="button" class="edit-btn edit-project-btn" data-id="${project.id}">
           <i class="fas fa-edit"></i> Edit
         </button>
-        <button class="delete-btn delete-project-btn" data-id="${project.id}">
+    <button type="button" class="delete-btn delete-project-btn" data-id="${project.id}">
           <i class="fas fa-trash"></i> Delete
         </button>
       </td>
@@ -1368,7 +1449,7 @@ function initializeCertifications() {
             const issuer = document.getElementById("certIssuer").value.trim();
             const date = document.getElementById("certDate").value;
             const expiryDate = document.getElementById("certExpiryDate").value;
-            const image = document.getElementById("certImage").value.trim();
+            const image = normalizeImagePath(document.getElementById("certImage").value.trim());
             const verificationUrl = document.getElementById("certVerificationUrl").value.trim();
             const description = document.getElementById("certDescription").value.trim();
 
@@ -1462,10 +1543,10 @@ function renderCertificationsTable() {
       <td>${cert.issuer}</td>
       <td>${new Date(cert.date).toLocaleDateString()}</td>
       <td>
-        <button class="edit-btn edit-cert-btn" data-id="${cert.id}">
+    <button type="button" class="edit-btn edit-cert-btn" data-id="${cert.id}">
           <i class="fas fa-edit"></i> Edit
         </button>
-        <button class="delete-btn delete-cert-btn" data-id="${cert.id}">
+    <button type="button" class="delete-btn delete-cert-btn" data-id="${cert.id}">
           <i class="fas fa-trash"></i> Delete
         </button>
       </td>

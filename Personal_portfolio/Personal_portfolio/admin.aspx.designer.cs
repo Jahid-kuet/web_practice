@@ -11,5 +11,14 @@ namespace PortfolioWebsite
 {
     public partial class admin
     {
+    /// <summary>
+    /// rptAdminProjects control.
+    /// </summary>
+    protected global::System.Web.UI.WebControls.Repeater rptAdminProjects;
+
+    /// <summary>
+    /// rptAdminCertifications control.
+    /// </summary>
+    protected global::System.Web.UI.WebControls.Repeater rptAdminCertifications;
     }
 }

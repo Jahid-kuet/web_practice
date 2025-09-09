@@ -216,7 +216,12 @@ namespace PortfolioWebsite
         private void LoadProjects()
         {
             string query = @"
-        SELECT ProjectTitle, ProjectDescription, ProjectImage, GitHubLink
+        SELECT 
+            ProjectID,
+            ProjectTitle,
+            ProjectDescription,
+            ProjectImage,
+            GitHubLink
         FROM Projects
         WHERE IsActive = 1
         ORDER BY IsFeatured DESC, DisplayOrder, CreatedDate DESC";
@@ -234,6 +239,7 @@ namespace PortfolioWebsite
                         {
                             projects.Add(new
                             {
+                                ProjectID = reader["ProjectID"],
                                 ProjectTitle = reader["ProjectTitle"].ToString(),
                                 ProjectDescription = reader["ProjectDescription"].ToString(),
                                 ProjectImage = reader["ProjectImage"].ToString(),
@@ -244,6 +250,9 @@ namespace PortfolioWebsite
                         // ✅ Bind to repeater
                         rptProjects.DataSource = projects;
                         rptProjects.DataBind();
+
+                        // ✅ Store JSON for optional frontend JS
+                        ViewState["ProjectsData"] = new JavaScriptSerializer().Serialize(projects);
                     }
                 }
             }
@@ -252,10 +261,11 @@ namespace PortfolioWebsite
             ClientScript.RegisterStartupScript(
                 this.GetType(),
                 "logProjects",
-                "console.log('Projects loaded successfully, count: " + rptProjects.Items.Count + "');",
+                "console.log('Projects loaded successfully. Count: " + rptProjects.Items.Count + "');",
                 true
             );
         }
+
 
 
         private void LoadCertifications()

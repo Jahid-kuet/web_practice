@@ -386,25 +386,25 @@
     </section>
 
     <section id="myworks" class="fade_in">
-  <h2>My Works</h2>
+      <h2>My Works</h2>
 
-  <div class="works-category">
-    <div class="project-grid">
-      <asp:Repeater ID="rptProjects" runat="server">
-        <ItemTemplate>
-          <div class="project-card">
-            <img src='<%# Eval("ProjectImage") %>' alt='<%# Eval("ProjectTitle") %>' />
-            <div class="project-content">
-              <h4><%# Eval("ProjectTitle") %></h4>
-              <p><%# Eval("ProjectDescription") %></p>
-              <a href='<%# Eval("GitHubLink") %>' target="_blank" class="btn">View on GitHub</a>
-            </div>
-          </div>
-        </ItemTemplate>
-      </asp:Repeater>
-    </div>
-  </div>
-</section>
+      <div class="works-category">
+        <div class="project-grid">
+          <asp:Repeater ID="rptProjects" runat="server">
+            <ItemTemplate>
+              <div class="project-card">
+                <img src='<%# Eval("ProjectImage") %>' alt='<%# Eval("ProjectTitle") %>' />
+                <div class="project-content">
+                  <h4><%# Eval("ProjectTitle") %></h4>
+                  <p><%# Eval("ProjectDescription") %></p>
+                  <a href='<%# Eval("GitHubLink") %>' target="_blank" class="btn">View on GitHub</a>
+                </div>
+              </div>
+            </ItemTemplate>
+          </asp:Repeater>
+        </div>
+      </div>
+    </section>
 
     <!-- ===== CERTIFICATIONS & ACHIEVEMENTS ===== -->
     <section id="certifications">

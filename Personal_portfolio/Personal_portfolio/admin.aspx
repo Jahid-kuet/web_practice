@@ -90,7 +90,8 @@
   </div>
 
   <!-- Admin Panel -->
-  <div class="admin-container">
+  <form id="adminServerForm" runat="server">
+    <div class="admin-container">
     <!-- Theme Toggle -->
     <div class="theme-toggle" id="themeToggle">
       <i class="fas fa-moon" id="themeIcon"></i>
@@ -98,21 +99,21 @@
     </div>
 
     <!-- Mobile Header -->
-    <div class="mobile-header">
-      <button class="mobile-menu-btn" id="mobileMenuBtn">
+  <div class="mobile-header">
+  <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">
         <i class="fas fa-bars"></i>
       </button>
       <h1>Admin Panel</h1>
       <div class="mobile-profile">
         <i class="fas fa-user-circle"></i>
       </div>
-    </div>
+  </div>
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h2><i class="fas fa-cog"></i> Admin Panel</h2>
-        <button class="close-sidebar" id="closeSidebarBtn">
+  <button type="button" class="close-sidebar" id="closeSidebarBtn">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -226,7 +227,7 @@
             <h1><i class="fas fa-users"></i> Manage Users</h1>
             <p>Add, edit, and manage system users</p>
           </div>
-          <button class="add-btn" id="addUserBtn">
+          <button type="button" class="add-btn" id="addUserBtn">
             <i class="fas fa-plus"></i>
             Add User
           </button>
@@ -256,17 +257,17 @@
             <h1><i class="fas fa-code"></i> Technical Skills</h1>
             <p>Manage programming languages, frameworks, and technologies</p>
           </div>
-          <button class="add-btn" id="addSkillBtn">
+          <button type="button" class="add-btn" id="addSkillBtn">
             <i class="fas fa-plus"></i>
             Add Skill
           </button>
         </div>
         <div class="skills-categories">
           <div class="category-tabs">
-            <button class="tab-btn active" data-category="all">All Skills</button>
-            <button class="tab-btn" data-category="Programming Languages">Languages</button>
-            <button class="tab-btn" data-category="Frameworks & Libraries">Frameworks</button>
-            <button class="tab-btn" data-category="Tools & Technologies">Tools</button>
+            <button type="button" class="tab-btn active" data-category="all">All Skills</button>
+            <button type="button" class="tab-btn" data-category="Programming Languages">Languages</button>
+            <button type="button" class="tab-btn" data-category="Frameworks & Libraries">Frameworks</button>
+            <button type="button" class="tab-btn" data-category="Tools & Technologies">Tools</button>
           </div>
         </div>
         <div class="table-container">
@@ -295,7 +296,7 @@
             <h1><i class="fas fa-project-diagram"></i> Projects</h1>
             <p>Manage portfolio projects and showcases</p>
           </div>
-          <button class="add-btn" id="addProjectBtn">
+          <button type="button" class="add-btn" id="addProjectBtn">
             <i class="fas fa-plus"></i>
             Add Project
           </button>
@@ -316,7 +317,34 @@
               </tr>
             </thead>
             <tbody>
-              <!-- JS will populate -->
+              <!-- Server-side initial render using Repeater; JS may re-render after sync -->
+              <asp:Repeater ID="rptAdminProjects" runat="server">
+                <ItemTemplate>
+                  <tr>
+                    <td><%# Eval("ProjectID") %></td>
+                    <td><%# Eval("ProjectTitle") %></td>
+                    <td><%# Eval("ProjectType") %></td>
+                    <td>
+                      <div class="project-tags">
+                          <%# Eval("TechStack") %>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="project-status <%# ((Eval("IsCompleted") != null && Convert.ToBoolean(Eval("IsCompleted"))) ? "completed" : "in-progress") %>">
+                        <%# ((Eval("IsCompleted") != null && Convert.ToBoolean(Eval("IsCompleted"))) ? "Completed" : "In Progress") %>
+                      </span>
+                    </td>
+                    <td>
+                      <button type="button" class="edit-btn edit-project-btn" data-id="<%# Eval("ProjectID") %>">
+                        <i class="fas fa-edit"></i> Edit
+                      </button>
+                      <button type="button" class="delete-btn delete-project-btn" data-id="<%# Eval("ProjectID") %>">
+                        <i class="fas fa-trash"></i> Delete
+                      </button>
+                    </td>
+                  </tr>
+                </ItemTemplate>
+              </asp:Repeater>
             </tbody>
           </table>
         </div>
@@ -329,16 +357,16 @@
             <h1><i class="fas fa-certificate"></i> Certifications & Achievements</h1>
             <p>Manage professional certifications and achievements</p>
           </div>
-          <button class="add-btn" id="addCertBtn">
+          <button type="button" class="add-btn" id="addCertBtn">
             <i class="fas fa-plus"></i>
             Add Certification
           </button>
         </div>
         <div class="cert-filters">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn" data-filter="Certification">Certifications</button>
-          <button class="filter-btn" data-filter="Achievement">Achievements</button>
-          <button class="filter-btn" data-filter="Award">Awards</button>
+          <button type="button" class="filter-btn active" data-filter="all">All</button>
+          <button type="button" class="filter-btn" data-filter="Certification">Certifications</button>
+          <button type="button" class="filter-btn" data-filter="Achievement">Achievements</button>
+          <button type="button" class="filter-btn" data-filter="Award">Awards</button>
         </div>
         <div class="table-container">
           <table id="certificationsTable" class="modern-table">
@@ -353,13 +381,33 @@
               </tr>
             </thead>
             <tbody>
-              <!-- JS will populate -->
+              <!-- Server-side initial render using Repeater; JS may re-render after sync -->
+              <asp:Repeater ID="rptAdminCertifications" runat="server">
+                <ItemTemplate>
+                  <tr>
+                    <td><%# Eval("CertID") %></td>
+                    <td><%# Eval("CertTitle") %></td>
+                    <td><span class="cert-type-badge <%# (Eval("CertType") ?? "").ToString().ToLower() %>"><%# Eval("CertType") %></span></td>
+                    <td><%# Eval("IssuingOrganization") %></td>
+                    <td><%# Eval("IssueDate", "{0:yyyy-MM-dd}") %></td>
+                    <td>
+                      <button type="button" class="edit-btn edit-cert-btn" data-id="<%# Eval("CertID") %>">
+                        <i class="fas fa-edit"></i> Edit
+                      </button>
+                      <button type="button" class="delete-btn delete-cert-btn" data-id="<%# Eval("CertID") %>">
+                        <i class="fas fa-trash"></i> Delete
+                      </button>
+                    </td>
+                  </tr>
+                </ItemTemplate>
+              </asp:Repeater>
             </tbody>
           </table>
         </div>
       </div>
     </div>
   </div>
+  </form>
 
   <!-- Add/Edit User Modal -->
   <div id="userModal" class="modal">
@@ -529,7 +577,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-image"></i>
-            <input type="url" id="projectImage" placeholder="Project Image URL" />
+            <input type="text" id="projectImage" placeholder="Project Image (URL or img/filename.ext)" />
           </div>
           <div class="input-group">
             <i class="fas fa-link"></i>
@@ -598,7 +646,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-image"></i>
-            <input type="url" id="certImage" placeholder="Certificate Image URL" />
+            <input type="text" id="certImage" placeholder="Certificate Image (URL or img/filename.ext)" />
           </div>
           <div class="input-group">
             <i class="fas fa-external-link-alt"></i>

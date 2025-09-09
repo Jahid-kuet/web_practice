@@ -25,6 +25,9 @@ namespace PortfolioWebsite
             if (!IsPostBack)
             {
                 CheckAuthenticationStatus();
+                // Always bind read-only data for initial render; CRUD remains auth-protected
+                try { LoadAdminProjects(); } catch { }
+                try { LoadAdminCertifications(); } catch { }
             }
         }
 
@@ -617,10 +620,8 @@ namespace PortfolioWebsite
             {
                 string connectionString = ConfigurationManager.ConnectionStrings["PortfolioConnectionString"].ConnectionString;
                 
-                string query = @"
-                    UPDATE Projects 
-                    SET IsActive = 0, UpdatedDate = GETDATE() 
-                    WHERE ProjectID = @ProjectID";
+                // Hard delete as requested
+                string query = @"DELETE FROM Projects WHERE ProjectID = @ProjectID";
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
@@ -633,7 +634,7 @@ namespace PortfolioWebsite
 
                         if (result > 0)
                         {
-                            LogAdminActivity("Delete Project", $"Deleted project ID: {projectId}", GetCurrentUsername());
+                            LogAdminActivity("Delete Project", $"Hard-deleted project ID: {projectId}", GetCurrentUsername());
                             return new JavaScriptSerializer().Serialize(new { success = true, message = "Project deleted successfully" });
                         }
                         else
@@ -849,10 +850,8 @@ namespace PortfolioWebsite
             {
                 string connectionString = ConfigurationManager.ConnectionStrings["PortfolioConnectionString"].ConnectionString;
                 
-                string query = @"
-                    UPDATE CertificationsAchievements 
-                    SET IsActive = 0, UpdatedDate = GETDATE() 
-                    WHERE CertID = @CertID";
+                // Hard delete as requested
+                string query = @"DELETE FROM CertificationsAchievements WHERE CertID = @CertID";
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
@@ -865,7 +864,7 @@ namespace PortfolioWebsite
 
                         if (result > 0)
                         {
-                            LogAdminActivity("Delete Certification", $"Deleted certification ID: {certId}", GetCurrentUsername());
+                            LogAdminActivity("Delete Certification", $"Hard-deleted certification ID: {certId}", GetCurrentUsername());
                             return new JavaScriptSerializer().Serialize(new { success = true, message = "Certification deleted successfully" });
                         }
                         else
@@ -903,11 +902,11 @@ namespace PortfolioWebsite
                     {
                         TotalSkills = GetCount(conn, "TechnicalSkills"),
                         TotalProjects = GetCount(conn, "Projects"),
-                        TotalCertifications = GetCount(conn, "Certifications"),
+                        TotalCertifications = GetCount(conn, "CertificationsAchievements"),
                         TotalContactMessages = GetCount(conn, "ContactMessages"),
                         ActiveSkills = GetActiveCount(conn, "TechnicalSkills"),
                         ActiveProjects = GetActiveCount(conn, "Projects"),
-                        ActiveCertifications = GetActiveCount(conn, "Certifications"),
+                        ActiveCertifications = GetActiveCount(conn, "CertificationsAchievements"),
                         UnreadMessages = GetUnreadMessagesCount(conn)
                     };
 
@@ -951,8 +950,65 @@ namespace PortfolioWebsite
 
         private void LoadAdminDashboardData()
         {
-            // Load dashboard data when admin is authenticated
-            // This can be called from Page_Load after authentication check
+            // Reserved for future dashboard-specific server data
+        }
+
+        // Server-side data binders for admin Repeaters (initial render)
+        private void LoadAdminProjects()
+        {
+            string query = @"
+                SELECT 
+                    ProjectID, ProjectTitle, ProjectDescription, ProjectImage,
+                    GitHubLink, LiveDemoLink, TechStack, ProjectType,
+                    IsCompleted
+                FROM Projects 
+                WHERE IsActive = 1
+                ORDER BY IsFeatured DESC, DisplayOrder, CreatedDate DESC";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    var table = new DataTable();
+                    table.Load(reader);
+                    // Use strongly-typed control from designer
+                    if (this.rptAdminProjects != null)
+                    {
+                        this.rptAdminProjects.DataSource = table;
+                        this.rptAdminProjects.DataBind();
+                    }
+                }
+            }
+        }
+
+        private void LoadAdminCertifications()
+        {
+            string query = @"
+                SELECT 
+                    CertID, CertTitle, CertDescription, CertImage,
+                    IssuingOrganization, IssueDate, CertType
+                FROM CertificationsAchievements 
+                WHERE IsActive = 1 
+                ORDER BY IsFeatured DESC, DisplayOrder, IssueDate DESC";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    var table = new DataTable();
+                    table.Load(reader);
+                    // Use strongly-typed control from designer
+                    if (this.rptAdminCertifications != null)
+                    {
+                        this.rptAdminCertifications.DataSource = table;
+                        this.rptAdminCertifications.DataBind();
+                    }
+                }
+            }
         }
 
         private static bool IsAuthenticated()
