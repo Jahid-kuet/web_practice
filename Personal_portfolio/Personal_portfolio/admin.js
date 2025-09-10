@@ -645,13 +645,17 @@ async function callWebMethod(method, payload) {
                 'Content-Type': 'application/json; charset=utf-8',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            credentials: 'same-origin',
+            credentials: 'include',
             body: JSON.stringify(payload || {})
         });
         const status = res.status;
         let text = await res.text();
         // If the response looks like HTML (e.g., redirected login page), treat as auth error
         if (!res.ok || (text && /<\s*html[\s>]/i.test(text))) {
+            try {
+                const loginModal = document.getElementById('loginModal');
+                if (loginModal) loginModal.classList.add('active');
+            } catch {}
             return { success: false, requireAuth: true, message: 'Authentication required or server error.' };
         }
         // WebForms PageMethods often return { d: "...json..." } or { d: { ... } }
@@ -659,9 +663,23 @@ async function callWebMethod(method, payload) {
             const parsed = JSON.parse(text);
             if (parsed && typeof parsed === 'object' && parsed.hasOwnProperty('d')) {
                 if (typeof parsed.d === 'string') {
-                    try { return JSON.parse(parsed.d); } catch { return { success: false, message: parsed.d }; }
+                    try { 
+                        const inner = JSON.parse(parsed.d);
+                        if (inner && (inner.requireAuth || /Authentication required/i.test(inner.message || ''))) {
+                            try { const loginModal = document.getElementById('loginModal'); if (loginModal) loginModal.classList.add('active'); } catch {}
+                        }
+                        return inner; 
+                    } catch { 
+                        return { success: false, message: parsed.d }; 
+                    }
+                }
+                if (parsed.d && (parsed.d.requireAuth || /Authentication required/i.test(parsed.d.message || ''))) {
+                    try { const loginModal = document.getElementById('loginModal'); if (loginModal) loginModal.classList.add('active'); } catch {}
                 }
                 return parsed.d;
+            }
+            if (parsed && (parsed.requireAuth || /Authentication required/i.test(parsed.message || ''))) {
+                try { const loginModal = document.getElementById('loginModal'); if (loginModal) loginModal.classList.add('active'); } catch {}
             }
             return parsed;
         } catch (e) {
@@ -760,6 +778,9 @@ async function syncFromServer() {
                 };
                 const r = await callWebMethod('AddSkill', payload);
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Add skill failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             } else if (key === 'projects') {
                 const payload = {
                     projectTitle: item.title,
@@ -777,6 +798,9 @@ async function syncFromServer() {
                 };
                 const r = await callWebMethod('AddProject', payload);
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Add project failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             } else if (key === 'certifications') {
                 const payload = {
                     certTitle: item.title,
@@ -793,14 +817,18 @@ async function syncFromServer() {
                 };
                 const r = await callWebMethod('AddCertification', payload);
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Add certification failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             }
+            // Fallback to local add for non-server-backed keys (e.g., users)
+            const result = origAdd(key, item);
+            broadcastChange(key);
+            return result;
         } catch(e) {
             showNotification(e.message || 'Add failed', 'error');
         }
-        // Always refresh from server for authoritative data/IDs
-        await syncFromServer();
-        broadcastChange(key);
-        return true;
+        return false;
     };
 
     dataStore.update = async function(key, id, updated){
@@ -818,6 +846,9 @@ async function syncFromServer() {
                 };
                 const r = await callWebMethod('UpdateSkill', payload);
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Update skill failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             } else if (key === 'projects') {
                 const payload = {
                     projectId: id,
@@ -837,6 +868,9 @@ async function syncFromServer() {
                 };
                 const r = await callWebMethod('UpdateProject', payload);
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Update project failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             } else if (key === 'certifications') {
                 const payload = {
                     certId: id,
@@ -855,13 +889,18 @@ async function syncFromServer() {
                 };
                 const r = await callWebMethod('UpdateCertification', payload);
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Update certification failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             }
+            // Fallback to local update for non-server-backed keys (e.g., users)
+            const result = origUpdate(key, id, updated);
+            broadcastChange(key);
+            return result ? true : false;
         } catch(e) {
             showNotification(e.message || 'Update failed', 'error');
         }
-        await syncFromServer();
-        broadcastChange(key);
-        return true;
+        return false;
     };
 
     dataStore.delete = async function(key, id){
@@ -869,21 +908,30 @@ async function syncFromServer() {
             if (key === 'skills') {
                 const r = await callWebMethod('DeleteSkill', { skillId: id });
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Delete skill failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             } else if (key === 'projects') {
                 const r = await callWebMethod('DeleteProject', { projectId: id });
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Delete project failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             } else if (key === 'certifications') {
                 const r = await callWebMethod('DeleteCertification', { certId: id });
                 if (!r || r.success !== true) throw new Error(r && r.message || 'Delete certification failed');
+                await syncFromServer();
+                broadcastChange(key);
+                return true;
             }
-            // Update local after server success to avoid UI drift
+            // Fallback to local delete for non-server-backed keys (e.g., users)
             origDelete(key, id);
+            broadcastChange(key);
+            return true;
         } catch(e) {
             showNotification(e.message || 'Delete failed', 'error');
         }
-        await syncFromServer();
-        broadcastChange(key);
-        return true;
+        return false;
     };
 })();
 
