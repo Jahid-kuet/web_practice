@@ -577,7 +577,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-image"></i>
-            <input type="text" id="projectImage" placeholder="Project Image (URL or img/filename.ext)" />
+            <input type="url" id="projectImage" placeholder="Project Image URL" />
           </div>
           <div class="input-group">
             <i class="fas fa-link"></i>
@@ -646,7 +646,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-image"></i>
-            <input type="text" id="certImage" placeholder="Certificate Image (URL or img/filename.ext)" />
+            <input type="url" id="certImage" placeholder="Certificate Image URL" />
           </div>
           <div class="input-group">
             <i class="fas fa-external-link-alt"></i>
@@ -674,3 +674,4 @@
   <script src="admin.js"></script>
 </body>
 </html>
+

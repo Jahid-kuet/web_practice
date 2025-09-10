@@ -7,20 +7,6 @@ document.addEventListener("DOMContentLoaded", function () {
     initializeAdminPanel();
 });
 
-// Normalize image paths: allow full URL, data URI, img/relative, or bare filename
-function normalizeImagePath(path) {
-    if (!path) return '';
-    let p = path.trim().replace(/\\/g, '/');
-    // Keep absolute URLs or protocol-relative or data URIs as-is
-    if (/^(?:https?:)?\/\//i.test(p) || /^data:/i.test(p)) return p;
-    // If already starts with img/ or /img/, keep as-is
-    if (/^\/?img\//i.test(p)) return p.replace(/^\//, '');
-    // If contains any slash, assume it's an app-relative path; keep as-is
-    if (p.includes('/')) return p;
-    // Otherwise treat as a filename in img/
-    return `img/${p}`;
-}
-
 // === SESSION MANAGEMENT ===
 class SessionManager {
     constructor() {
@@ -102,22 +88,6 @@ class SessionManager {
 
 const sessionManager = new SessionManager();
 
-// Cache last successful admin credentials in sessionStorage for auto re-auth
-const AuthState = {
-    set(creds) {
-        try { sessionStorage.setItem('admin_creds', JSON.stringify({ u: creds.username, p: creds.password })); } catch (e) {}
-    },
-    get() {
-        try {
-            const s = sessionStorage.getItem('admin_creds');
-            if (!s) return null;
-            const obj = JSON.parse(s);
-            return { username: obj.u, password: obj.p };
-        } catch (e) { return null; }
-    },
-    clear() { try { sessionStorage.removeItem('admin_creds'); } catch (e) {} }
-};
-
 // === NOTIFICATION SYSTEM ===
 function showNotification(message, type = 'info', duration = 3000) {
     const notification = document.createElement('div');
@@ -182,14 +152,7 @@ function showNotification(message, type = 'info', duration = 3000) {
 function initializeSession() {
     const loginModal = document.getElementById("loginModal");
 
-    // Set default credentials if not exists
-    if (!localStorage.getItem("adminPwd")) {
-        localStorage.setItem("adminPwd", "admin123");
-    }
-
-    if (!localStorage.getItem("adminSecretKey")) {
-        localStorage.setItem("adminSecretKey", "engineer");
-    }
+    // No client-side seeding of secrets; rely on server-side configuration
 
     // Check session on load
     if (sessionManager.isLoggedIn()) {
@@ -310,19 +273,15 @@ function initializeLogin() {
             e.preventDefault();
             const username = loginForm.username.value.trim();
             const password = loginForm.password.value.trim();
-
             (async () => {
                 const resp = await callWebMethod('AuthenticateAdmin', { username, password });
                 if (!resp || resp.success !== true) {
                     loginMsg.innerHTML = '<i class="fas fa-times-circle"></i> Invalid username or password.';
                     loginMsg.style.color = "#ef4444";
                     loginMsg.style.background = "rgba(239, 68, 68, 0.1)";
-                    showNotification('Invalid credentials', 'error');
+                    showNotification(resp && resp.message ? resp.message : 'Invalid credentials', 'error');
                     return;
                 }
-
-                // Cache creds for auto re-auth
-                AuthState.set({ username, password });
 
                 loginMsg.innerHTML = '<i class="fas fa-check-circle"></i> Login successful!';
                 loginMsg.style.color = "#22c55e";
@@ -370,19 +329,11 @@ function initializeLogin() {
 
     // Forgot Password Form Handler
     if (forgotPasswordForm) {
-        forgotPasswordForm.addEventListener("submit", function (e) {
+        forgotPasswordForm.addEventListener("submit", async function (e) {
             e.preventDefault();
             const secretKey = document.getElementById("secret-key").value.trim();
             const newPassword = document.getElementById("new-password").value.trim();
             const confirmPassword = document.getElementById("confirm-password").value.trim();
-            const savedSecretKey = localStorage.getItem("adminSecretKey");
-
-            if (secretKey !== savedSecretKey) {
-                forgotPasswordMsg.innerHTML = '<i class="fas fa-times-circle"></i> Invalid secret key.';
-                forgotPasswordMsg.style.color = "#ef4444";
-                forgotPasswordMsg.style.background = "rgba(239, 68, 68, 0.1)";
-                return;
-            }
 
             if (newPassword.length < 4) {
                 forgotPasswordMsg.innerHTML = '<i class="fas fa-times-circle"></i> Password must be at least 4 characters.';
@@ -398,7 +349,14 @@ function initializeLogin() {
                 return;
             }
 
-            localStorage.setItem("adminPwd", newPassword);
+            const resp = await callWebMethod('ResetPasswordWithSecret', { secretKey, newPassword });
+            if (!resp || resp.success !== true) {
+                forgotPasswordMsg.innerHTML = `<i class=\"fas fa-times-circle\"></i> ${resp && resp.message ? resp.message : 'Password reset failed'}`;
+                forgotPasswordMsg.style.color = "#ef4444";
+                forgotPasswordMsg.style.background = "rgba(239, 68, 68, 0.1)";
+                return;
+            }
+
             forgotPasswordMsg.innerHTML = '<i class="fas fa-check-circle"></i> Password reset successfully!';
             forgotPasswordMsg.style.color = "#22c55e";
             forgotPasswordMsg.style.background = "rgba(34, 197, 94, 0.1)";
@@ -407,7 +365,7 @@ function initializeLogin() {
                 forgotPasswordModal.classList.remove("active");
                 loginModal.classList.add("active");
                 showNotification('Password reset successfully! Please login with your new password.', 'success');
-            }, 2000);
+            }, 1200);
         });
     }
 }
@@ -484,11 +442,12 @@ function initializeNavigation() {
     if (logoutBtn) {
         logoutBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            (async () => { try { await callWebMethod('Logout', {}); } catch(e) {} })();
-            AuthState.clear();
-            sessionManager.clearSession();
-            showNotification('Logged out successfully', 'info');
-            setTimeout(() => location.reload(), 1000);
+            (async () => {
+                try { await callWebMethod('Logout', {}); } catch {}
+                sessionManager.clearSession();
+                showNotification('Logged out successfully', 'info');
+                setTimeout(() => location.reload(), 800);
+            })();
         });
     }
 }
@@ -519,16 +478,8 @@ function initializePasswordManagement() {
     if (pwdForm) {
         pwdForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            const oldPwd = document.getElementById("oldPwd").value;
-            const newPwd = document.getElementById("newPwd").value;
-            const savedPwd = localStorage.getItem("adminPwd");
-
-            if (oldPwd !== savedPwd) {
-                pwdMsg.innerHTML = '<i class="fas fa-times-circle"></i> Current password is incorrect.';
-                pwdMsg.style.color = "#ef4444";
-                pwdMsg.style.background = "rgba(239, 68, 68, 0.1)";
-                return;
-            }
+            const oldPwd = document.getElementById("oldPwd").value.trim();
+            const newPwd = document.getElementById("newPwd").value.trim();
 
             if (newPwd.length < 4) {
                 pwdMsg.innerHTML = '<i class="fas fa-times-circle"></i> New password must be at least 4 characters.';
@@ -537,13 +488,24 @@ function initializePasswordManagement() {
                 return;
             }
 
-            localStorage.setItem("adminPwd", newPwd);
-            pwdMsg.innerHTML = '<i class="fas fa-check-circle"></i> Password updated successfully!';
-            pwdMsg.style.color = "#22c55e";
-            pwdMsg.style.background = "rgba(34, 197, 94, 0.1)";
+            (async () => {
+                const resp = await callWebMethod('ChangePassword', { currentPassword: oldPwd, newPassword: newPwd });
+                if (!resp || resp.success !== true) {
+                    pwdMsg.innerHTML = `<i class=\"fas fa-times-circle\"></i> ${resp && resp.message ? resp.message : 'Password update failed'}`;
+                    pwdMsg.style.color = "#ef4444";
+                    pwdMsg.style.background = "rgba(239, 68, 68, 0.1)";
+                    return;
+                }
 
-            showNotification('Password updated successfully!', 'success');
-            setTimeout(() => pwdModal.classList.remove("active"), 1500);
+                pwdMsg.innerHTML = '<i class="fas fa-check-circle"></i> Password updated successfully!';
+                pwdMsg.style.color = "#22c55e";
+                pwdMsg.style.background = "rgba(34, 197, 94, 0.1)";
+                showNotification('Password updated. Please log in again with your new password.', 'success');
+
+                try { await callWebMethod('Logout', {}); } catch {}
+                sessionManager.clearSession();
+                setTimeout(() => { window.location.reload(); }, 1200);
+            })();
         });
     }
 }
@@ -675,37 +637,13 @@ class DataStore {
 const dataStore = new DataStore();
 
 // ===== Server Integration & Live Refresh =====
-async function ensureServerAuth() {
-    const creds = AuthState.get();
-    if (!creds || !creds.username || !creds.password) return { success: false };
-    try {
-        const r = await fetch('admin.aspx/AuthenticateAdmin', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Cache-Control': 'no-cache'
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ username: creds.username, password: creds.password })
-        });
-        const txt = await r.text();
-        try {
-            const p = JSON.parse(txt);
-            const val = p && p.d ? (typeof p.d === 'string' ? JSON.parse(p.d) : p.d) : p;
-            return val && val.success === true ? { success: true } : { success: false };
-        } catch { return { success: false }; }
-    } catch { return { success: false }; }
-}
-
-async function callWebMethod(method, payload, _retried) {
+async function callWebMethod(method, payload) {
     try {
         const res = await fetch(`admin.aspx/${method}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Cache-Control': 'no-cache'
+                'X-Requested-With': 'XMLHttpRequest'
             },
             credentials: 'same-origin',
             body: JSON.stringify(payload || {})
@@ -714,12 +652,6 @@ async function callWebMethod(method, payload, _retried) {
         let text = await res.text();
         // If the response looks like HTML (e.g., redirected login page), treat as auth error
         if (!res.ok || (text && /<\s*html[\s>]/i.test(text))) {
-            if (!_retried) {
-                const auth = await ensureServerAuth();
-                if (auth && auth.success) {
-                    return await callWebMethod(method, payload, true);
-                }
-            }
             return { success: false, requireAuth: true, message: 'Authentication required or server error.' };
         }
         // WebForms PageMethods often return { d: "...json..." } or { d: { ... } }
@@ -1276,7 +1208,7 @@ function initializeProjects() {
             const category = document.getElementById("projectCategory").value.trim();
             const technologies = document.getElementById("projectTechnologies").value.trim();
             const status = document.getElementById("projectStatus").value;
-            const image = normalizeImagePath(document.getElementById("projectImage").value.trim());
+            const image = document.getElementById("projectImage").value.trim();
             const liveUrl = document.getElementById("projectLiveUrl").value.trim();
             const githubUrl = document.getElementById("projectGithubUrl").value.trim();
             const description = document.getElementById("projectDescription").value.trim();
@@ -1449,7 +1381,7 @@ function initializeCertifications() {
             const issuer = document.getElementById("certIssuer").value.trim();
             const date = document.getElementById("certDate").value;
             const expiryDate = document.getElementById("certExpiryDate").value;
-            const image = normalizeImagePath(document.getElementById("certImage").value.trim());
+            const image = document.getElementById("certImage").value.trim();
             const verificationUrl = document.getElementById("certVerificationUrl").value.trim();
             const description = document.getElementById("certDescription").value.trim();
 
@@ -1623,3 +1555,6 @@ additionalStyles.textContent = `
   }
 `;
 document.head.appendChild(additionalStyles);
+
+
+

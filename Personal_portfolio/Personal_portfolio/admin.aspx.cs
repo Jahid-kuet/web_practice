@@ -10,6 +10,7 @@ using System.Web.Services;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Web.Configuration;
 
 namespace PortfolioWebsite
 {
@@ -25,9 +26,12 @@ namespace PortfolioWebsite
             if (!IsPostBack)
             {
                 CheckAuthenticationStatus();
-                // Always bind read-only data for initial render; CRUD remains auth-protected
-                try { LoadAdminProjects(); } catch { }
-                try { LoadAdminCertifications(); } catch { }
+                // If authenticated, load initial admin data for Repeaters
+                if (Session["IsAdminAuthenticated"] != null && (bool)Session["IsAdminAuthenticated"])
+                {
+                    try { LoadAdminProjects(); } catch { }
+                    try { LoadAdminCertifications(); } catch { }
+                }
             }
         }
 
@@ -113,16 +117,27 @@ namespace PortfolioWebsite
 
                 if (currentPassword == adminPass)
                 {
-                    // In a real application, you would update the password in the database
-                    // For now, we'll just simulate success
-                    LogAdminActivity("Password Change", "Password changed successfully", 
-                        System.Web.HttpContext.Current.Session["AdminUsername"].ToString());
+                    // Persist new password in Web.config appSettings
+                    bool updated = UpdateAppSetting("AdminPassword", newPassword);
+                    if (updated)
+                    {
+                        LogAdminActivity("Password Change", "Password changed successfully",
+                            System.Web.HttpContext.Current.Session["AdminUsername"].ToString());
 
-                    return new JavaScriptSerializer().Serialize(new 
-                    { 
-                        success = true, 
-                        message = "Password changed successfully" 
-                    });
+                        return new JavaScriptSerializer().Serialize(new
+                        {
+                            success = true,
+                            message = "Password changed successfully"
+                        });
+                    }
+                    else
+                    {
+                        return new JavaScriptSerializer().Serialize(new
+                        {
+                            success = false,
+                            message = "Failed to persist new password"
+                        });
+                    }
                 }
                 else
                 {
@@ -152,14 +167,24 @@ namespace PortfolioWebsite
 
                 if (secretKey == configSecretKey)
                 {
-                    // In a real application, you would update the password in the database
-                    LogAdminActivity("Password Reset", "Password reset using secret key", "admin");
-
-                    return new JavaScriptSerializer().Serialize(new 
-                    { 
-                        success = true, 
-                        message = "Password reset successfully" 
-                    });
+                    bool updated = UpdateAppSetting("AdminPassword", newPassword);
+                    if (updated)
+                    {
+                        LogAdminActivity("Password Reset", "Password reset using secret key", "admin");
+                        return new JavaScriptSerializer().Serialize(new
+                        {
+                            success = true,
+                            message = "Password reset successfully"
+                        });
+                    }
+                    else
+                    {
+                        return new JavaScriptSerializer().Serialize(new
+                        {
+                            success = false,
+                            message = "Failed to persist new password"
+                        });
+                    }
                 }
                 else
                 {
@@ -210,6 +235,31 @@ namespace PortfolioWebsite
         }
 
         #endregion
+
+        // Persist an appSetting value to Web.config
+        private static bool UpdateAppSetting(string key, string value)
+        {
+            try
+            {
+                var config = WebConfigurationManager.OpenWebConfiguration("~");
+                if (config.AppSettings.Settings[key] == null)
+                {
+                    config.AppSettings.Settings.Add(key, value);
+                }
+                else
+                {
+                    config.AppSettings.Settings[key].Value = value;
+                }
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try { LogError($"UpdateAppSetting({key})", ex); } catch { }
+                return false;
+            }
+        }
 
         #region CRUD Operations - Technical Skills
 
@@ -950,7 +1000,10 @@ namespace PortfolioWebsite
 
         private void LoadAdminDashboardData()
         {
-            // Reserved for future dashboard-specific server data
+            // Load dashboard data when admin is authenticated
+            // This can be called from Page_Load after authentication check
+            try { LoadAdminProjects(); } catch { }
+            try { LoadAdminCertifications(); } catch { }
         }
 
         // Server-side data binders for admin Repeaters (initial render)
@@ -973,11 +1026,11 @@ namespace PortfolioWebsite
                 {
                     var table = new DataTable();
                     table.Load(reader);
-                    // Use strongly-typed control from designer
-                    if (this.rptAdminProjects != null)
+                    var rpt = FindControl("rptAdminProjects") as Repeater;
+                    if (rpt != null)
                     {
-                        this.rptAdminProjects.DataSource = table;
-                        this.rptAdminProjects.DataBind();
+                        rpt.DataSource = table;
+                        rpt.DataBind();
                     }
                 }
             }
@@ -1001,11 +1054,11 @@ namespace PortfolioWebsite
                 {
                     var table = new DataTable();
                     table.Load(reader);
-                    // Use strongly-typed control from designer
-                    if (this.rptAdminCertifications != null)
+                    var rpt = FindControl("rptAdminCertifications") as Repeater;
+                    if (rpt != null)
                     {
-                        this.rptAdminCertifications.DataSource = table;
-                        this.rptAdminCertifications.DataBind();
+                        rpt.DataSource = table;
+                        rpt.DataBind();
                     }
                 }
             }
