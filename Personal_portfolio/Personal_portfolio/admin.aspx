@@ -98,6 +98,12 @@
       <span id="themeText">Dark</span>
     </div>
 
+    <!-- Fixed View Frontend button below theme toggle -->
+    <a href="index.aspx" class="view-frontend-fab" title="Open frontend">
+      <i class="fas fa-external-link-alt"></i>
+      <span>View Frontend</span>
+    </a>
+
     <!-- Mobile Header -->
   <div class="mobile-header">
   <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">
@@ -160,6 +166,10 @@
           </div>
           <div class="header-actions">
             <span class="last-updated">Last updated: <span id="lastUpdated">Just now</span></span>
+            <a href="index.aspx" class="view-site-btn" style="margin-left:12px; display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; background:#2563eb; color:#fff; text-decoration:none; white-space:nowrap;">
+              <i class="fas fa-external-link-alt"></i>
+              <span>View Frontend</span>
+            </a>
           </div>
         </div>
         <div class="dashboard-cards">
@@ -524,7 +534,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-link"></i>
-            <input type="url" id="skillImageUrl" placeholder="Image URL (optional)" />
+            <input type="text" id="skillImageUrl" placeholder="Image path (e.g., img/python.png)" list="imgList" />
           </div>
         </div>
         <div class="modal-actions">
@@ -577,7 +587,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-image"></i>
-            <input type="url" id="projectImage" placeholder="Project Image URL" />
+            <input type="text" id="projectImage" placeholder="Project image path (e.g., img/ecommerce_api.jpg)" list="imgList" />
           </div>
           <div class="input-group">
             <i class="fas fa-link"></i>
@@ -646,7 +656,7 @@
           </div>
           <div class="input-group">
             <i class="fas fa-image"></i>
-            <input type="url" id="certImage" placeholder="Certificate Image URL" />
+            <input type="text" id="certImage" placeholder="Certificate image path (e.g., img/certi3.jpg)" list="imgList" />
           </div>
           <div class="input-group">
             <i class="fas fa-external-link-alt"></i>
@@ -671,7 +681,54 @@
     </div>
   </div>
 
+  <!-- Shared datalist for image choices -->
+  <datalist id="imgList"></datalist>
+
   <script src="admin.js"></script>
+  <script>
+    // Populate image datalist from server (admin.aspx.cs ListImages)
+    (function(){
+      const dl = document.getElementById('imgList');
+      if (!dl) return;
+      fetch('admin.aspx/ListImages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        credentials: 'include',
+        body: JSON.stringify({})
+      })
+      .then(r => r.json())
+      .then(payload => {
+        const data = payload && (payload.d ? JSON.parse(payload.d) : payload) || {};
+        if (!data.success || !Array.isArray(data.images)) return;
+        dl.innerHTML = data.images.map(src => '<option value="' + src + '"></option>').join('');
+        // Build filename -> full path map for convenience
+        const map = {};
+        data.images.forEach(src => { var fn = src.split('/').pop(); if(fn) map[fn] = src; });
+        // Attach normalizer on fields
+        function normalizeInput(id){
+          var el = document.getElementById(id);
+          if(!el) return;
+          el.addEventListener('blur', function(){
+            var v = (el.value || '').trim();
+            if(!v) return;
+            if (v.startsWith('http://') || v.startsWith('https://') || v.startsWith('data:')) return;
+            if (v.startsWith('img/')) return;
+            var mapped = map[v];
+            if (mapped) { el.value = mapped; return; }
+            // If user typed just filename and exists case-insensitively
+            var lower = v.toLowerCase();
+            for (var k in map){ if (k.toLowerCase() === lower){ el.value = map[k]; return; } }
+            // Fallback: prefix img/
+            el.value = 'img/' + v;
+          });
+        }
+        normalizeInput('skillImageUrl');
+        normalizeInput('projectImage');
+        normalizeInput('certImage');
+      })
+      .catch(()=>{});
+    })();
+  </script>
 </body>
 </html>
 

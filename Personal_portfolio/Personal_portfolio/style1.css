@@ -310,6 +310,14 @@ header {
     z-index: 1000;
 }
 
+/* Force black header with white text for better readability */
+header {
+    background: #000 !important;
+}
+header, header a, header .admin-text, header .admin-menu-btn {
+    color: #fff !important;
+}
+
 .logo {
     width: 60px;
 }
@@ -504,6 +512,20 @@ header {
     .admin-menu-btn:hover {
         color: #005582;
     }
+
+/* Admin text link beside three dots */
+.admin-text {
+    margin-left: 8px;
+    color: #0077b5;
+    font-weight: 600;
+    text-decoration: none;
+    align-self: center;
+}
+
+.admin-text:hover {
+    color: #005582;
+    text-decoration: underline;
+}
 
 /* Extra small screens */
 @media (max-width: 600px) {

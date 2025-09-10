@@ -11,6 +11,8 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Web.Configuration;
+using System.Web;
+using System.Linq;
 
 namespace PortfolioWebsite
 {
@@ -51,6 +53,48 @@ namespace PortfolioWebsite
             }
         }
 
+        // List image files under ~/img for admin pickers
+        [WebMethod(EnableSession = true)]
+        public static string ListImages()
+        {
+            try
+            {
+                // Optional auth check; comment out to allow unauthenticated preview
+                if (HttpContext.Current.Session["IsAdminAuthenticated"] == null ||
+                    !(bool)HttpContext.Current.Session["IsAdminAuthenticated"])
+                {
+                    return new JavaScriptSerializer().Serialize(new
+                    {
+                        success = false,
+                        message = "Not authenticated",
+                        images = new string[0]
+                    });
+                }
+
+                var server = HttpContext.Current.Server;
+                var root = server.MapPath("~/img");
+                if (!Directory.Exists(root))
+                {
+                    return new JavaScriptSerializer().Serialize(new { success = true, images = new string[0] });
+                }
+
+                var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                { ".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif" };
+                var files = Directory.EnumerateFiles(root)
+                    .Where(p => allowed.Contains(Path.GetExtension(p)))
+                    .Select(p => "img/" + Path.GetFileName(p))
+                    .OrderBy(p => p)
+                    .ToList();
+
+                return new JavaScriptSerializer().Serialize(new { success = true, images = files });
+            }
+            catch (Exception ex)
+            {
+                try { LogError("ListImages", ex); } catch { }
+                return new JavaScriptSerializer().Serialize(new { success = false, message = "Failed to list images" });
+            }
+        }
+
     [WebMethod(EnableSession = true)]
         public static string AuthenticateAdmin(string username, string password)
         {
@@ -64,6 +108,14 @@ namespace PortfolioWebsite
                     System.Web.HttpContext.Current.Session["IsAdminAuthenticated"] = true;
                     System.Web.HttpContext.Current.Session["AdminUsername"] = username;
                     System.Web.HttpContext.Current.Session["LoginTime"] = DateTime.Now;
+                    // Mark session active and set lightweight cookies for UI
+                    try
+                    {
+                        System.Web.HttpContext.Current.Session["LastSeen"] = DateTime.Now;
+                        SetCookie("AdminSession", Guid.NewGuid().ToString("N"), httpOnly: true);
+                        SetCookie("AdminUI", "loggedIn", httpOnly: false);
+                    }
+                    catch { }
 
                     // Log successful login
                     LogAdminActivity("Login", "Successful admin login", username);
@@ -216,6 +268,13 @@ namespace PortfolioWebsite
                 System.Web.HttpContext.Current.Session.Clear();
                 System.Web.HttpContext.Current.Session.Abandon();
 
+                try
+                {
+                    ClearCookie("AdminSession");
+                    ClearCookie("AdminUI");
+                }
+                catch { }
+
                 LogAdminActivity("Logout", "Admin logged out", username);
 
                 return new JavaScriptSerializer().Serialize(new 
@@ -231,6 +290,45 @@ namespace PortfolioWebsite
                     success = false, 
                     message = "Error during logout" 
                 });
+            }
+        }
+
+    [WebMethod(EnableSession = true)]
+        public static string GetSessionInfo()
+        {
+            try
+            {
+                var ctx = System.Web.HttpContext.Current;
+                bool isAuth = ctx.Session["IsAdminAuthenticated"] != null && (bool)ctx.Session["IsAdminAuthenticated"];
+                string username = ctx.Session["AdminUsername"]?.ToString() ?? string.Empty;
+                bool hasSessionCookie = ctx.Request.Cookies["ASP.NET_SessionId"] != null;
+                bool hasAdminCookie = ctx.Request.Cookies["AdminSession"] != null;
+                return new JavaScriptSerializer().Serialize(new
+                {
+                    success = true,
+                    isAuthenticated = isAuth,
+                    username = username,
+                    serverTime = DateTime.Now.ToString("o"),
+                    cookies = new { aspNetSession = hasSessionCookie, adminSession = hasAdminCookie }
+                });
+            }
+            catch
+            {
+                return new JavaScriptSerializer().Serialize(new { success = false, message = "Unable to get session info" });
+            }
+        }
+
+    [WebMethod(EnableSession = true)]
+        public static string KeepAlive()
+        {
+            try
+            {
+                System.Web.HttpContext.Current.Session["LastSeen"] = DateTime.Now;
+                return new JavaScriptSerializer().Serialize(new { success = true, message = "OK" });
+            }
+            catch
+            {
+                return new JavaScriptSerializer().Serialize(new { success = false, message = "KeepAlive failed" });
             }
         }
 
@@ -278,6 +376,7 @@ namespace PortfolioWebsite
                         SkillDescription, IconImage, DisplayOrder, 
                         IsActive, CreatedDate, UpdatedDate
                     FROM TechnicalSkills 
+                    WHERE IsActive = 1
                     ORDER BY DisplayOrder, CategoryName, SkillName";
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -1154,6 +1253,37 @@ namespace PortfolioWebsite
                     File.AppendAllText(logPath, $"{DateTime.Now}: {method} - {ex.Message}\n{ex.StackTrace}\n\n");
                 }
                 catch { }
+            }
+        }
+
+        // Cookie helpers
+        private static void SetCookie(string name, string value, bool httpOnly = true, int? minutes = null)
+        {
+            var ctx = System.Web.HttpContext.Current;
+            var cookie = new System.Web.HttpCookie(name, value)
+            {
+                HttpOnly = httpOnly,
+                Secure = false,
+                SameSite = System.Web.SameSiteMode.Lax
+            };
+            if (minutes.HasValue)
+            {
+                cookie.Expires = DateTime.Now.AddMinutes(minutes.Value);
+            }
+            ctx.Response.Cookies.Add(cookie);
+        }
+
+        private static void ClearCookie(string name)
+        {
+            var ctx = System.Web.HttpContext.Current;
+            if (ctx.Request.Cookies[name] != null)
+            {
+                var cookie = new System.Web.HttpCookie(name)
+                {
+                    Expires = DateTime.Now.AddDays(-1),
+                    Value = string.Empty
+                };
+                ctx.Response.Cookies.Add(cookie);
             }
         }
 

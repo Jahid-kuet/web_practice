@@ -61,6 +61,7 @@ class PortfolioSession {
     }
 
     applyTheme(theme) {
+        const root = document.documentElement;
         const themes = {
             light: {
                 '--bg-color': '#f8fafc',
@@ -77,18 +78,43 @@ class PortfolioSession {
             auto: null // Will use system preference
         };
 
-        if (theme === 'auto') {
-            // Remove custom theme and use system preference
+        // Always clear inline overrides first to let [data-theme] or media query take control
+        if (themes.light) {
             Object.keys(themes.light).forEach(prop => {
-                document.documentElement.style.removeProperty(prop);
-            });
-        } else if (themes[theme]) {
-            Object.entries(themes[theme]).forEach(([property, value]) => {
-                document.documentElement.style.setProperty(property, value);
+                root.style.removeProperty(prop);
             });
         }
 
+        if (theme === 'auto') {
+            // Follow system preference: remove explicit data-theme
+            root.removeAttribute('data-theme');
+            // Also reflect current system theme in meta tag
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.updateThemeColorMeta(prefersDark ? 'dark' : 'light');
+        } else if (themes[theme]) {
+            // Set attribute so CSS [data-theme] rules apply consistently
+            root.setAttribute('data-theme', theme);
+            // Apply inline vars too for immediate effect (and for components relying on vars directly)
+            Object.entries(themes[theme]).forEach(([property, value]) => {
+                root.style.setProperty(property, value);
+            });
+            this.updateThemeColorMeta(theme);
+        }
+
         this.savePreference('theme', theme);
+        // Keep a simple flag as well for other scripts
+        localStorage.setItem('portfolio_theme', theme);
+    }
+
+    updateThemeColorMeta(theme) {
+        // Keep browser UI (address bar) in sync with theme
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (!meta) return;
+        if (theme === 'dark') {
+            meta.setAttribute('content', '#1a202c');
+        } else {
+            meta.setAttribute('content', '#0077b6');
+        }
     }
 }
 
@@ -460,13 +486,46 @@ class ContactForm {
         const data = Object.fromEntries(formData.entries());
 
         this.showLoading();
-
-        // Simulate form submission (replace with actual endpoint)
-        setTimeout(() => {
+        // Call server WebMethod
+        fetch('index.aspx/SendContactMessage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+            body: JSON.stringify({
+                name: data.name || '',
+                email: data.email || '',
+                subject: data.subject || 'Portfolio Contact',
+                message: data.message || ''
+            })
+        })
+        .then(async (res) => {
+            // WebForms WebMethod responses come under .d
+            const text = await res.text();
+            try {
+                return JSON.parse(text);
+            } catch {
+                // In case of HTML error page, throw
+                throw new Error('Unexpected response');
+            }
+        })
+        .then((payload) => {
+            let result = payload && (payload.d || payload);
+            if (typeof result === 'string') {
+                try { result = JSON.parse(result); } catch (e) { /* ignore */ }
+            }
+            const ok = result && result.success;
             this.hideLoading();
-            this.showMessage("Thank you for reaching out! I'll get back to you soon.", "success");
-            this.form.reset();
-        }, 2000);
+            if (ok) {
+                this.showMessage(result.message || "Thank you for reaching out! I'll get back to you soon.", 'success');
+                this.form.reset();
+            } else {
+                this.showMessage((result && result.message) || 'Failed to send message. Please try again.', 'error');
+            }
+        })
+        .catch((err) => {
+            this.hideLoading();
+            this.showMessage('Network error. Please try again later.', 'error');
+            console.error('Contact submit error:', err);
+        });
     }
 
     validateForm() {

@@ -154,17 +154,26 @@ function initializeSession() {
 
     // No client-side seeding of secrets; rely on server-side configuration
 
-    // Check session on load
-    if (sessionManager.isLoggedIn()) {
-        loginModal.classList.remove("active");
+    // Check session on load against server
+    (async () => {
+        try {
+            const info = await callWebMethod('GetSessionInfo', {});
+            if (info && info.success && info.isAuthenticated) {
+                loginModal.classList.remove("active");
+            } else if (sessionManager.isLoggedIn()) {
+                sessionManager.clearSession();
+                loginModal.classList.add("active");
+            } else {
+                loginModal.classList.add("active");
+            }
+        } catch {}
         updateLastActiveTime();
-    } else {
-        loginModal.classList.add("active");
-    }
+    })();
 
-    // Auto-logout on inactivity (30 minutes)
+    // Auto-logout on inactivity (30 minutes) + keep-alive
     let inactivityTimer;
     const inactivityTime = 30 * 60 * 1000; // 30 minutes
+    let keepAliveTimer;
 
     function resetInactivityTimer() {
         clearTimeout(inactivityTimer);
@@ -176,12 +185,20 @@ function initializeSession() {
                 setTimeout(() => location.reload(), 2000);
             }
         }, inactivityTime);
+    try { callWebMethod('KeepAlive', {}); } catch {}
     }
 
     // Track user activity
     ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
         document.addEventListener(event, resetInactivityTimer, true);
     });
+
+    // Background keep-alive every 5 minutes
+    keepAliveTimer = setInterval(() => {
+        if (sessionManager.isLoggedIn()) {
+            try { callWebMethod('KeepAlive', {}); } catch {}
+        }
+    }, 5 * 60 * 1000);
 
     // Update last active time
     function updateLastActiveTime() {
@@ -1160,10 +1177,17 @@ function initializeSkills() {
         if (e.target.closest('.delete-skill-btn')) {
             const id = parseInt(e.target.closest('.delete-skill-btn').dataset.id);
             if (confirm('Are you sure you want to delete this skill?')) {
-                dataStore.delete('skills', id);
-                showNotification('Skill deleted successfully!', 'success');
-                renderSkillsTable();
-                loadDashboardData();
+                (async () => {
+                    const ok = await dataStore.delete('skills', id);
+                    if (ok) {
+                        try { await syncFromServer(); } catch {}
+                        showNotification('Skill deleted successfully!', 'success');
+                        renderSkillsTable();
+                        loadDashboardData();
+                    } else {
+                        showNotification('Delete failed', 'error');
+                    }
+                })();
             }
         }
     });

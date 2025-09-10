@@ -519,6 +519,21 @@ body {
     backdrop-filter: blur(10px);
 }
 
+/* Place Last Updated to the left of the theme toggle */
+.last-updated {
+        position: fixed;
+        top: 20px;
+        right: 200px; /* sits left of theme toggle (which is at right:20px) */
+        z-index: 1001;
+}
+
+@media (max-width: 600px) {
+    .last-updated {
+        top: 120px;   /* below the floating controls on small screens */
+        right: 12px;
+    }
+}
+
 /* Dashboard Cards */
 .dashboard-cards {
     display: grid;
@@ -1433,6 +1448,43 @@ body {
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
+/* Smaller Edit/Delete buttons in admin tables for better density */
+.table-container table.modern-table .edit-btn,
+.table-container table.modern-table .delete-btn {
+    padding: 8px 14px;            /* larger, comfortable */
+    font-size: 0.9rem;            /* match table cell text */
+    border-radius: 8px;
+    gap: 8px;
+    line-height: 1.2;
+    min-height: 34px;             /* taller buttons */
+    min-width: 100px;             /* wider buttons */
+}
+
+/* Make the Actions cell use flex with a consistent gap */
+.table-container table.modern-table td:last-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px; /* space between Edit and Delete */
+    flex-wrap: wrap; /* avoid overflow on smaller screens */
+}
+
+/* Avoid extra spacing when using flex gap */
+.table-container table.modern-table .edit-btn {
+    margin-right: 0;
+}
+
+.table-container table.modern-table .edit-btn i,
+.table-container table.modern-table .delete-btn i {
+    font-size: 0.95rem; /* align with text size */
+}
+
+/* Keep compact buttons steady on hover inside tables */
+.table-container table.modern-table .edit-btn:hover,
+.table-container table.modern-table .delete-btn:hover {
+    transform: none;
+    box-shadow: none;
+    filter: brightness(1.03);
+}
 
 .modern-table {
     width: 100%;
@@ -1897,6 +1949,37 @@ body {
     cursor: pointer;
     transition: var(--transition);
     backdrop-filter: blur(10px);
+}
+
+/* Floating View Frontend button under theme toggle */
+.view-frontend-fab {
+        position: fixed;
+        top: 80px; /* below theme toggle */
+        right: 20px;
+        z-index: 1001;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #fff !important;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 10px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: var(--shadow-soft);
+        transition: var(--transition);
+}
+
+/* Hide legacy header "View Frontend" link to avoid duplicates */
+.header-actions .view-site-btn {
+    display: none !important;
+}
+
+.view-frontend-fab i { font-size: 0.95rem; }
+.view-frontend-fab span { font-weight: 600; font-size: 0.95rem; }
+.view-frontend-fab:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); filter: brightness(1.05); }
+
+@media (max-width: 600px) {
+    .view-frontend-fab { top: 74px; right: 12px; padding: 8px 12px; }
 }
 
     .theme-toggle:hover {

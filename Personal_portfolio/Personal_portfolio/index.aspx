@@ -20,6 +20,25 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('portfolio_theme');
+          if (!theme) {
+            var prefs = {};
+            try { prefs = JSON.parse(localStorage.getItem('portfolio_preferences') || '{}'); } catch (e) { prefs = {}; }
+            theme = prefs.theme || 'auto';
+          }
+          var root = document.documentElement;
+          if (theme === 'light' || theme === 'dark') {
+            root.setAttribute('data-theme', theme);
+          } else {
+            root.removeAttribute('data-theme');
+          }
+        } catch (e) { /* noop */ }
+      })();
+    </script>
+
   <!-- Stylesheets -->
     <link rel="stylesheet" href="style1.css" />
     <link rel="stylesheet" href="admin.css" />
@@ -74,6 +93,7 @@
       >
         <i class="fas fa-ellipsis-v"></i>
       </button>
+  <a href="admin.aspx" class="admin-text" aria-label="Go to admin">Admin</a>
     </header>
 
     <section id="hero">
@@ -95,7 +115,7 @@
         <a href="https://twitter.com/yourusername" target="_blank"
           ><i class="fab fa-twitter"></i
         ></a>
-        <a href="mailto:your@email.com"><i class="fas fa-envelope"></i></a>
+  <a href="#contact" aria-label="Go to contact section"><i class="fas fa-envelope"></i></a>
       </div>
       <div class="hero-content">
         <h1>Hi, I'm <span class="highlight">Jahid Hasan</span></h1>

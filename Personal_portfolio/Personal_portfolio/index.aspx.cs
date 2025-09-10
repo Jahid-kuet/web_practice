@@ -8,6 +8,8 @@ using System.Configuration;
 using System.Web.Script.Serialization;
 using System.Web.Services;
 using System.IO;
+using System.Net;
+using System.Net.Mail;
 
 namespace PortfolioWebsite
 {
@@ -563,7 +565,8 @@ namespace PortfolioWebsite
             }
         }
 
-        [WebMethod]
+    [WebMethod]
+    [System.Web.Script.Services.ScriptMethod(ResponseFormat = System.Web.Script.Services.ResponseFormat.Json)]
         public static string SendContactMessage(string name, string email, string subject, string message)
         {
             try
@@ -587,11 +590,100 @@ namespace PortfolioWebsite
                         cmd.Parameters.AddWithValue("@IPAddress", System.Web.HttpContext.Current.Request.UserHostAddress ?? string.Empty);
                         cmd.Parameters.AddWithValue("@UserAgent", System.Web.HttpContext.Current.Request.UserAgent ?? string.Empty);
 
-                        conn.Open();
-                        int result = cmd.ExecuteNonQuery();
+                        int result = 0;
+                        try
+                        {
+                            conn.Open();
+                            // Ensure table exists before inserting to avoid runtime failures on fresh DBs
+                            EnsureContactMessagesTableExists(conn);
+                            result = cmd.ExecuteNonQuery();
+                        }
+                        catch (Exception dbEx)
+                        {
+                            // Fallback: persist to file so the user doesn't lose the message
+                            try 
+                            { 
+                                LogErrorToFile("SendContactMessage_DB", dbEx);
+                                SaveContactToFile(
+                                    name ?? string.Empty,
+                                    email ?? string.Empty,
+                                    string.IsNullOrWhiteSpace(subject) ? "Portfolio Contact" : subject,
+                                    message ?? string.Empty,
+                                    System.Web.HttpContext.Current.Request.UserHostAddress ?? string.Empty,
+                                    System.Web.HttpContext.Current.Request.UserAgent ?? string.Empty
+                                );
+                                // Treat as saved
+                                result = 1;
+                            }
+                            catch (Exception fileEx)
+                            {
+                                // If even file fallback fails, rethrow to outer handler
+                                LogErrorToFile("SendContactMessage_FileFallback", fileEx);
+                                throw;
+                            }
+                        }
 
                         if (result > 0)
                         {
+                            // Attempt to send an email notification to site owner
+                            try
+                            {
+                                var toEmail = ConfigurationManager.AppSettings["ContactToEmail"] ?? "hasan2107064@stud.kuet.ac.bd";
+                                var smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
+                                var smtpPortStr = ConfigurationManager.AppSettings["SmtpPort"];
+                                var smtpUser = ConfigurationManager.AppSettings["SmtpUser"];
+                                var smtpPass = ConfigurationManager.AppSettings["SmtpPass"];
+                                var smtpSslStr = ConfigurationManager.AppSettings["SmtpEnableSsl"];
+                                var fromEmail = ConfigurationManager.AppSettings["SmtpFrom"] ?? (string.IsNullOrEmpty(smtpUser) ? "no-reply@localhost" : smtpUser);
+
+                                int smtpPort = 25;
+                                int.TryParse(smtpPortStr, out smtpPort);
+                                bool enableSsl = true;
+                                bool.TryParse(smtpSslStr, out enableSsl);
+
+                                // Build subject/body with sensible defaults
+                                string safeSubject = string.IsNullOrWhiteSpace(subject) ? ($"Portfolio Contact - {name}") : subject;
+                                var encodedMessage = System.Web.HttpUtility.HtmlEncode(message ?? string.Empty).Replace("\n", "<br/>");
+                                string htmlBody = $@"<h2>New Contact Message</h2>
+<p><strong>Name:</strong> {System.Web.HttpUtility.HtmlEncode(name)}</p>
+<p><strong>Email:</strong> {System.Web.HttpUtility.HtmlEncode(email)}</p>
+<p><strong>Subject:</strong> {System.Web.HttpUtility.HtmlEncode(safeSubject)}</p>
+<p><strong>Message:</strong><br/>{encodedMessage}</p>
+<hr/><p style='color:#888'><small>IP: {System.Web.HttpContext.Current.Request.UserHostAddress} | UA: {System.Web.HttpContext.Current.Request.UserAgent}</small></p>";
+
+                                if (!string.IsNullOrWhiteSpace(smtpHost))
+                                {
+                                    using (var mail = new MailMessage())
+                                    {
+                                        mail.To.Add(new MailAddress(toEmail));
+                                        mail.From = new MailAddress(fromEmail, "Portfolio Website");
+                                        mail.Subject = safeSubject;
+                                        mail.Body = htmlBody;
+                                        mail.IsBodyHtml = true;
+
+                                        using (var smtp = new SmtpClient(smtpHost, smtpPort))
+                                        {
+                                            smtp.EnableSsl = enableSsl;
+                                            if (!string.IsNullOrEmpty(smtpUser))
+                                            {
+                                                smtp.Credentials = new NetworkCredential(smtpUser, smtpPass ?? string.Empty);
+                                            }
+                                            smtp.Send(mail);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception mailEx)
+                            {
+                                // Do not fail the API if email fails; just log
+                                try 
+                                { 
+                                    System.Diagnostics.Debug.WriteLine($"Email send error: {mailEx.Message}"); 
+                                    LogErrorToFile("SendContactMessage_Email", mailEx);
+                                } 
+                                catch { }
+                            }
+
                             return new JavaScriptSerializer().Serialize(new 
                             { 
                                 success = true, 
@@ -611,12 +703,19 @@ namespace PortfolioWebsite
             }
             catch (Exception ex)
             {
-                // Log error (implement your logging mechanism)
-                System.Diagnostics.Debug.WriteLine($"Contact form error: {ex.Message}");
+                // Log error to file for troubleshooting
+                try { LogErrorToFile("SendContactMessage", ex); } catch { }
+
+                // If debug enabled, surface a hint for easier diagnosis (only on local/dev)
+                bool debug = false; bool.TryParse(ConfigurationManager.AppSettings["EnableDebugMode"], out debug);
+                var userMsg = debug 
+                    ? ($"Error: {ex.Message}") 
+                    : "An error occurred while sending your message. Please try again later.";
+
                 return new JavaScriptSerializer().Serialize(new 
                 { 
                     success = false, 
-                    message = "An error occurred while sending your message. Please try again later." 
+                    message = userMsg 
                 });
             }
         }
@@ -624,6 +723,70 @@ namespace PortfolioWebsite
         #endregion
 
         #region Helper Methods
+        private static void SaveContactToFile(string name, string email, string subject, string message, string ip, string ua)
+        {
+            var ctx = System.Web.HttpContext.Current;
+            var baseDir = ctx != null 
+                ? ctx.Server.MapPath("~/App_Data")
+                : Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? "", "App_Data");
+            Directory.CreateDirectory(baseDir);
+            var filePath = Path.Combine(baseDir, "contact_fallback.csv");
+            var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            // Basic CSV escaping by wrapping fields in quotes and doubling internal quotes
+            var fields = new [] { CsvEscape(now), CsvEscape(name), CsvEscape(email), CsvEscape(subject), CsvEscape(message), CsvEscape(ip), CsvEscape(ua) };
+            var line = string.Join(",", fields) + "\r\n";
+            File.AppendAllText(filePath, line);
+        }
+
+        private static string CsvEscape(string s)
+        {
+            return "\"" + (s ?? string.Empty).Replace("\"", "\"\"") + "\"";
+        }
+        private static void EnsureContactMessagesTableExists(SqlConnection conn)
+        {
+            // Uses existing open connection. Creates table if missing.
+            const string ensureSql = @"
+IF OBJECT_ID(N'dbo.ContactMessages', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ContactMessages (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Name NVARCHAR(100) NULL,
+        Email NVARCHAR(256) NULL,
+        Subject NVARCHAR(200) NULL,
+        Message NVARCHAR(MAX) NULL,
+        IPAddress NVARCHAR(45) NULL,
+        UserAgent NVARCHAR(512) NULL,
+        CreatedDate DATETIME NOT NULL DEFAULT(GETDATE()),
+        IsRead BIT NOT NULL DEFAULT(0)
+    );
+END";
+
+            using (var ensureCmd = new SqlCommand(ensureSql, conn))
+            {
+                ensureCmd.ExecuteNonQuery();
+            }
+        }
+
+        private static void LogErrorToFile(string method, Exception ex)
+        {
+            try
+            {
+                var ctx = System.Web.HttpContext.Current;
+                var path = ctx != null 
+                    ? ctx.Server.MapPath("~/App_Data/error_log.txt")
+                    : Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? "", "App_Data", "error_log.txt");
+                var ip = ctx?.Request?.UserHostAddress ?? "";
+                var ua = ctx?.Request?.UserAgent ?? "";
+                var stamp = DateTime.Now.ToString();
+                var entry = $"{stamp}: {method} - {ex.Message}\r\n{ex}\r\nIP:{ip} UA:{ua}\r\n\r\n";
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                File.AppendAllText(path, entry);
+            }
+            catch
+            {
+                // Swallow to avoid secondary failures
+            }
+        }
 
         private void RegisterClientScripts()
         {
