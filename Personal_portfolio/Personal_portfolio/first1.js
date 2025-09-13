@@ -394,9 +394,17 @@ class ThemeManager {
             const savedTheme = localStorage.getItem('portfolio_theme') || 'auto';
             this.setTheme(savedTheme);
 
+            // Click to toggle light/dark directly (like admin)
             themeToggle.addEventListener("click", (e) => {
                 e.stopPropagation();
-                themeOptions.classList.toggle('show');
+                if (e.shiftKey) {
+                    // Shift+Click opens dropdown for explicit choice
+                    themeOptions.classList.toggle('show');
+                    return;
+                }
+                const current = (localStorage.getItem('portfolio_theme') || 'auto').toLowerCase();
+                const next = current === 'dark' ? 'light' : 'dark';
+                this.setTheme(next);
             });
 
             // Close theme options when clicking outside
@@ -467,8 +475,7 @@ class ContactForm {
 
     init() {
         if (!this.form) return;
-
-        this.form.addEventListener("submit", (e) => this.handleSubmit(e));
+    this.form.addEventListener("submit", (e) => this.handleSubmit(e));
 
         // Add real-time validation
         this.form.querySelectorAll('input, textarea').forEach(field => {
@@ -484,6 +491,11 @@ class ContactForm {
 
         const formData = new FormData(this.form);
         const data = Object.fromEntries(formData.entries());
+
+    // Always open user email client to avoid insecure form warnings and ensure inbox delivery
+    const mailto = this.buildMailtoLink(data);
+    window.location.href = mailto;
+    return;
 
         this.showLoading();
         // Call server WebMethod
@@ -518,12 +530,24 @@ class ContactForm {
                 this.showMessage(result.message || "Thank you for reaching out! I'll get back to you soon.", 'success');
                 this.form.reset();
             } else {
-                this.showMessage((result && result.message) || 'Failed to send message. Please try again.', 'error');
+                // If SMTP isn't configured on server, fallback to mailto client with composed body
+                if (result && result.message && /smtp is not configured/i.test(result.message)) {
+                    const mailto = this.buildMailtoLink(data);
+                    window.location.href = mailto;
+                    this.showMessage('Opening your email client…', 'info');
+                } else {
+                    this.showMessage((result && result.message) || 'Failed to send message. Please try again.', 'error');
+                }
             }
         })
         .catch((err) => {
             this.hideLoading();
-            this.showMessage('Network error. Please try again later.', 'error');
+            // Fallback to mailto on failure
+            const formData = new FormData(this.form);
+            const data = Object.fromEntries(formData.entries());
+            const mailto = this.buildMailtoLink(data);
+            try { window.location.href = mailto; } catch {}
+            this.showMessage('Network issue. Opened your email client as fallback.', 'warning');
             console.error('Contact submit error:', err);
         });
     }
@@ -607,6 +631,19 @@ class ContactForm {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
         }
+    }
+
+    buildMailtoLink(data) {
+        const to = 'hasan2107064@stud.kuet.ac.bd';
+        const subject = encodeURIComponent(data.subject || `Portfolio Contact - ${data.name || ''}`);
+        const bodyLines = [
+            `Name: ${data.name || ''}`,
+            `Email: ${data.email || ''}`,
+            '',
+            (data.message || '')
+        ];
+        const body = encodeURIComponent(bodyLines.join('\n'));
+        return `mailto:${to}?subject=${subject}&body=${body}`;
     }
 
     showMessage(message, type = 'info') {

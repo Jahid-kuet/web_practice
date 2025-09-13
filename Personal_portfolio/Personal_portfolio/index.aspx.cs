@@ -451,152 +451,74 @@ namespace PortfolioWebsite
         {
             try
             {
-                string connectionString = ConfigurationManager.ConnectionStrings["PortfolioConnectionString"].ConnectionString;
-                
-                string query = @"
-                    INSERT INTO ContactMessages 
-                    (Name, Email, Subject, Message, IPAddress, UserAgent, CreatedDate, IsRead) 
-                    VALUES 
-                    (@Name, @Email, @Subject, @Message, @IPAddress, @UserAgent, GETDATE(), 0)";
+                // Build subject/body with sensible defaults
+                string safeSubject = string.IsNullOrWhiteSpace(subject) ? ($"Portfolio Contact - {name}") : subject.Trim();
+                var encodedMessage = System.Web.HttpUtility.HtmlEncode(message ?? string.Empty).Replace("\n", "<br/>");
 
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                // SMTP configuration
+                var toEmail = ConfigurationManager.AppSettings["ContactToEmail"] ?? "hasan2107064@stud.kuet.ac.bd";
+                var smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
+                var smtpPortStr = ConfigurationManager.AppSettings["SmtpPort"];
+                var smtpUser = ConfigurationManager.AppSettings["SmtpUser"];
+                var smtpPass = ConfigurationManager.AppSettings["SmtpPass"];
+                var smtpSslStr = ConfigurationManager.AppSettings["SmtpEnableSsl"];
+                var fromEmail = ConfigurationManager.AppSettings["SmtpFrom"] ?? (string.IsNullOrEmpty(smtpUser) ? "no-reply@localhost" : smtpUser);
+
+                int smtpPort = 25; int.TryParse(smtpPortStr, out smtpPort);
+                bool enableSsl = true; bool.TryParse(smtpSslStr, out enableSsl);
+
+                if (string.IsNullOrWhiteSpace(smtpHost))
                 {
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    return new JavaScriptSerializer().Serialize(new
                     {
-                        cmd.Parameters.AddWithValue("@Name", name ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@Email", email ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@Subject", subject ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@Message", message ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@IPAddress", System.Web.HttpContext.Current.Request.UserHostAddress ?? string.Empty);
-                        cmd.Parameters.AddWithValue("@UserAgent", System.Web.HttpContext.Current.Request.UserAgent ?? string.Empty);
+                        success = false,
+                        message = "Email not sent: SMTP is not configured. Please set SmtpHost/SmtpUser/SmtpPass in Web.config."
+                    });
+                }
 
-                        int result = 0;
-                        try
-                        {
-                            conn.Open();
-                            // Ensure table exists before inserting to avoid runtime failures on fresh DBs
-                            EnsureContactMessagesTableExists(conn);
-                            result = cmd.ExecuteNonQuery();
-                        }
-                        catch (Exception dbEx)
-                        {
-                            // Fallback: persist to file so the user doesn't lose the message
-                            try 
-                            { 
-                                LogErrorToFile("SendContactMessage_DB", dbEx);
-                                SaveContactToFile(
-                                    name ?? string.Empty,
-                                    email ?? string.Empty,
-                                    string.IsNullOrWhiteSpace(subject) ? "Portfolio Contact" : subject,
-                                    message ?? string.Empty,
-                                    System.Web.HttpContext.Current.Request.UserHostAddress ?? string.Empty,
-                                    System.Web.HttpContext.Current.Request.UserAgent ?? string.Empty
-                                );
-                                // Treat as saved
-                                result = 1;
-                            }
-                            catch (Exception fileEx)
-                            {
-                                // If even file fallback fails, rethrow to outer handler
-                                LogErrorToFile("SendContactMessage_FileFallback", fileEx);
-                                throw;
-                            }
-                        }
-
-                        if (result > 0)
-                        {
-                            // Attempt to send an email notification to site owner
-                            try
-                            {
-                                var toEmail = ConfigurationManager.AppSettings["ContactToEmail"] ?? "hasan2107064@stud.kuet.ac.bd";
-                                var smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
-                                var smtpPortStr = ConfigurationManager.AppSettings["SmtpPort"];
-                                var smtpUser = ConfigurationManager.AppSettings["SmtpUser"];
-                                var smtpPass = ConfigurationManager.AppSettings["SmtpPass"];
-                                var smtpSslStr = ConfigurationManager.AppSettings["SmtpEnableSsl"];
-                                var fromEmail = ConfigurationManager.AppSettings["SmtpFrom"] ?? (string.IsNullOrEmpty(smtpUser) ? "no-reply@localhost" : smtpUser);
-
-                                int smtpPort = 25;
-                                int.TryParse(smtpPortStr, out smtpPort);
-                                bool enableSsl = true;
-                                bool.TryParse(smtpSslStr, out enableSsl);
-
-                                // Build subject/body with sensible defaults
-                                string safeSubject = string.IsNullOrWhiteSpace(subject) ? ($"Portfolio Contact - {name}") : subject;
-                                var encodedMessage = System.Web.HttpUtility.HtmlEncode(message ?? string.Empty).Replace("\n", "<br/>");
-                                string htmlBody = $@"<h2>New Contact Message</h2>
+                string htmlBody = $@"<h2>New Contact Message</h2>
 <p><strong>Name:</strong> {System.Web.HttpUtility.HtmlEncode(name)}</p>
 <p><strong>Email:</strong> {System.Web.HttpUtility.HtmlEncode(email)}</p>
 <p><strong>Subject:</strong> {System.Web.HttpUtility.HtmlEncode(safeSubject)}</p>
 <p><strong>Message:</strong><br/>{encodedMessage}</p>
 <hr/><p style='color:#888'><small>IP: {System.Web.HttpContext.Current.Request.UserHostAddress} | UA: {System.Web.HttpContext.Current.Request.UserAgent}</small></p>";
 
-                                if (!string.IsNullOrWhiteSpace(smtpHost))
-                                {
-                                    using (var mail = new MailMessage())
-                                    {
-                                        mail.To.Add(new MailAddress(toEmail));
-                                        mail.From = new MailAddress(fromEmail, "Portfolio Website");
-                                        mail.Subject = safeSubject;
-                                        mail.Body = htmlBody;
-                                        mail.IsBodyHtml = true;
+                using (var mail = new MailMessage())
+                {
+                    mail.To.Add(new MailAddress(toEmail));
+                    // Use authenticated address as From to avoid DMARC issues; set Reply-To to sender
+                    mail.From = new MailAddress(fromEmail, "Portfolio Website");
+                    if (!string.IsNullOrWhiteSpace(email))
+                    {
+                        try { mail.ReplyToList.Add(new MailAddress(email)); } catch { }
+                    }
+                    mail.Subject = safeSubject;
+                    mail.Body = htmlBody;
+                    mail.IsBodyHtml = true;
 
-                                        using (var smtp = new SmtpClient(smtpHost, smtpPort))
-                                        {
-                                            smtp.EnableSsl = enableSsl;
-                                            if (!string.IsNullOrEmpty(smtpUser))
-                                            {
-                                                smtp.Credentials = new NetworkCredential(smtpUser, smtpPass ?? string.Empty);
-                                            }
-                                            smtp.Send(mail);
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception mailEx)
-                            {
-                                // Do not fail the API if email fails; just log
-                                try 
-                                { 
-                                    System.Diagnostics.Debug.WriteLine($"Email send error: {mailEx.Message}"); 
-                                    LogErrorToFile("SendContactMessage_Email", mailEx);
-                                } 
-                                catch { }
-                            }
-
-                            return new JavaScriptSerializer().Serialize(new 
-                            { 
-                                success = true, 
-                                message = "Thank you for your message! I'll get back to you soon." 
-                            });
-                        }
-                        else
+                    using (var smtp = new SmtpClient(smtpHost, smtpPort))
+                    {
+                        smtp.EnableSsl = enableSsl;
+                        if (!string.IsNullOrEmpty(smtpUser))
                         {
-                            return new JavaScriptSerializer().Serialize(new 
-                            { 
-                                success = false, 
-                                message = "Failed to send message. Please try again." 
-                            });
+                            smtp.Credentials = new NetworkCredential(smtpUser, smtpPass ?? string.Empty);
                         }
+                        smtp.Send(mail);
                     }
                 }
+
+                return new JavaScriptSerializer().Serialize(new
+                {
+                    success = true,
+                    message = "Thank you for your message! I've received it."
+                });
             }
             catch (Exception ex)
             {
-                // Log error to file for troubleshooting
                 try { LogErrorToFile("SendContactMessage", ex); } catch { }
-
-                // If debug enabled, surface a hint for easier diagnosis (only on local/dev)
                 bool debug = false; bool.TryParse(ConfigurationManager.AppSettings["EnableDebugMode"], out debug);
-                var userMsg = debug 
-                    ? ($"Error: {ex.Message}") 
-                    : "An error occurred while sending your message. Please try again later.";
-
-                return new JavaScriptSerializer().Serialize(new 
-                { 
-                    success = false, 
-                    message = userMsg 
-                });
+                var userMsg = debug ? ($"Email error: {ex.Message}") : "Could not send email right now. Please try again later.";
+                return new JavaScriptSerializer().Serialize(new { success = false, message = userMsg });
             }
         }
 
@@ -671,6 +593,16 @@ END";
         private void RegisterClientScripts()
         {
             // Register portfolio data as JavaScript variables
+            // SMTP availability flag for contact form behavior
+            try
+            {
+                var smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
+                bool smtpConfigured = !string.IsNullOrWhiteSpace(smtpHost);
+                Page.ClientScript.RegisterStartupScript(this.GetType(), "SmtpConfig",
+                    $"window.smtpConfigured={(smtpConfigured ? "true" : "false")};", true);
+            }
+            catch { }
+
             if (ViewState["SkillsData"] != null)
             {
                 Page.ClientScript.RegisterStartupScript(this.GetType(), "SkillsData", 

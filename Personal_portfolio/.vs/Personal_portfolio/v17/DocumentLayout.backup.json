@@ -3,11 +3,11 @@
   "WorkspaceRootPath": "D:\\web_practice\\Personal_portfolio\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AF3F5D65-3612-404D-90E9-385652D88B07}|Personal_portfolio\\Personal_portfolio.csproj|d:\\web_practice\\personal_portfolio\\personal_portfolio\\index.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
+      "AbsoluteMoniker": "D:0:0:{AF3F5D65-3612-404D-90E9-385652D88B07}|Personal_portfolio\\Personal_portfolio.csproj|D:\\web_practice\\Personal_portfolio\\personal_portfolio\\index.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}",
       "RelativeMoniker": "D:0:0:{AF3F5D65-3612-404D-90E9-385652D88B07}|Personal_portfolio\\Personal_portfolio.csproj|solutionrelative:personal_portfolio\\index.aspx||{57312C73-6202-49E9-B1E1-40EA1A6DC1F6}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AF3F5D65-3612-404D-90E9-385652D88B07}|Personal_portfolio\\Personal_portfolio.csproj|D:\\web_practice\\Personal_portfolio\\personal_portfolio\\admin.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "AbsoluteMoniker": "D:0:0:{AF3F5D65-3612-404D-90E9-385652D88B07}|Personal_portfolio\\Personal_portfolio.csproj|d:\\web_practice\\personal_portfolio\\personal_portfolio\\admin.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{AF3F5D65-3612-404D-90E9-385652D88B07}|Personal_portfolio\\Personal_portfolio.csproj|solutionrelative:personal_portfolio\\admin.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
@@ -84,8 +84,7 @@
               "RelativeToolTip": "Personal_portfolio\\index.aspx.cs",
               "ViewState": "AgIAANUAAAAAAAAAAAAYwGAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-28T18:47:54.233Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-28T18:47:54.233Z"
             },
             {
               "$type": "Document",
@@ -97,8 +96,7 @@
               "RelativeToolTip": "Personal_portfolio\\first1.js",
               "ViewState": "AgIAAOUAAAAAAAAAAAAIwA4AAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-09-05T09:40:43.69Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-05T09:40:43.69Z"
             },
             {
               "$type": "Document",
@@ -123,8 +121,7 @@
               "RelativeToolTip": "Personal_portfolio\\admin.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-09-05T09:42:30.107Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-05T09:42:30.107Z"
             },
             {
               "$type": "Document",
@@ -134,7 +131,7 @@
               "RelativeDocumentMoniker": "Personal_portfolio\\admin.js",
               "ToolTip": "D:\\web_practice\\Personal_portfolio\\Personal_portfolio\\admin.js",
               "RelativeToolTip": "Personal_portfolio\\admin.js",
-              "ViewState": "AgIAABwAAAAAAAAAAAAQwDMAAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAACACAAAAAAAAAAAAADYCAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-09-05T09:42:53.411Z",
               "EditorCaption": ""
@@ -149,8 +146,7 @@
               "RelativeToolTip": "Personal_portfolio\\admin.aspx.cs",
               "ViewState": "AgIAAEQBAAAAAAAAAAAIwCcAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-05T09:43:05.278Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-05T09:43:05.278Z"
             },
             {
               "$type": "Document",
@@ -162,8 +158,7 @@
               "RelativeToolTip": "Personal_portfolio\\admin.aspx",
               "LogicalView": "7651a703-06e5-11d1-8ebd-00a0c90f26ea",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000195|",
-              "WhenOpened": "2025-08-28T19:12:02.815Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-28T19:12:02.815Z"
             },
             {
               "$type": "Document",
@@ -187,8 +182,7 @@
               "RelativeToolTip": "Personal_portfolio\\style1.css",
               "ViewState": "AgIAAEUEAAAAAAAAAAAAAN4IAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-09-05T09:40:26.3Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-05T09:40:26.3Z"
             },
             {
               "$type": "Document",

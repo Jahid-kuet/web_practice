@@ -72,16 +72,7 @@
           <i class="fas fa-download"></i> Resume
         </a>
 
-        <!-- Theme Toggle with Dropdown -->
-        <div class="theme-container">
-          <button id="themeToggle">
-            <i class="fas fa-moon"></i>
-          </button>
-          <div class="theme-options" id="themeOptions">
-            <button class="theme-btn" data-theme="light">Light Mode</button>
-            <button class="theme-btn" data-theme="dark">Dark Mode</button>
-          </div>
-        </div>
+        
       </div>
       <button id="navToggle" class="hamburger" aria-label="Open navigation">
         <span></span><span></span><span></span>
@@ -100,19 +91,19 @@
       <div id="particles-js"></div>
       <!-- Social Sidebar -->
       <div class="social-icons">
-        <a href="https://github.com/yourusername" target="_blank"
+    <a href="https://github.com/Jahid-kuet" target="_blank"
           ><i class="fab fa-github"></i
         ></a>
-        <a href="https://linkedin.com/in/yourusername" target="_blank"
+    <a href="https://www.linkedin.com/in/jahid-hasan" target="_blank"
           ><i class="fab fa-linkedin"></i
         ></a>
-        <a href="https://instagram.com/yourusername" target="_blank"
+    <a href="https://www.instagram.com/j_a_h_i_d_064?igsh=YzQzZjh5MXlqaGFp" target="_blank"
           ><i class="fab fa-instagram"></i
         ></a>
-        <a href="https://facebook.com/yourusername" target="_blank"
+    <a href="https://www.facebook.com/share/17JBqoiSyD/" target="_blank"
           ><i class="fab fa-facebook"></i
         ></a>
-        <a href="https://twitter.com/yourusername" target="_blank"
+    <a href="https://x.com/Jahidhasan064" target="_blank"
           ><i class="fab fa-twitter"></i
         ></a>
   <a href="#contact" aria-label="Go to contact section"><i class="fas fa-envelope"></i></a>
@@ -476,7 +467,7 @@
 
         <!-- Contact Form -->
         <form
-          action="mailto:hasan2107064@stud.kuet.ac.bd"
+          action="#"
           method="POST"
           enctype="text/plain"
           class="contact-form"
@@ -506,7 +497,7 @@
     <button id="backToTop">↑</button>
     <!-- adding js -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
-    <script src="first1.js"></script>
+  <script src="first1.js?v=20250914"></script>
     <div id="adminModalContainer"></div>
     <script src="admin.js"></script>
   </body>
